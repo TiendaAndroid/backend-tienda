@@ -25,7 +25,7 @@ import { JwtStrategy } from './strategies/jwt-strategy';
         return {
           secret: envs.jwt_secret,
           signOptions: {
-            expiresIn: '2h',
+            expiresIn: '2d',
           },
         };
       },

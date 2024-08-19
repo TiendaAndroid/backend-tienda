@@ -15,7 +15,6 @@ import { CreateUserDto, LoginUserDto } from './dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from './entities/user.entity';
 import { RawHeaders, GetUser, RoleProtected, Auth } from './decorators';
-import { UserRoleGuard } from './guards/user-role/user-role.guard';
 import { ValidRoles } from './interface';
 
 // Este controlador es responsable de manejar las solicitudes de los usuarios

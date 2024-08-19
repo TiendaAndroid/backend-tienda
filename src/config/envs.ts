@@ -13,6 +13,7 @@ interface EnvVars {
   DB_PASSWORD: string;
   DB_NAME: string;
   JWT_SECRET: string;
+  HOST_API: string;
 }
 
 // Validación de las variables de entorno
@@ -24,7 +25,8 @@ const envsSchema = joi
     DB_USER: joi.string().required(),
     DB_PASSWORD: joi.string().required(),
     DB_NAME: joi.string().required(),
-    JWT_SECRET: joi.string().required()
+    JWT_SECRET: joi.string().required(),
+    HOST_API: joi.string().required(),
   })
   .unknown(true);
 
@@ -46,5 +48,6 @@ export const envs = {
   db_user: envVars.DB_USER,
   db_password: envVars.DB_PASSWORD,
   db_name: envVars.DB_NAME,
-  jwt_secret: envVars.JWT_SECRET
+  jwt_secret: envVars.JWT_SECRET,
+  host_api: envVars.HOST_API,
 };

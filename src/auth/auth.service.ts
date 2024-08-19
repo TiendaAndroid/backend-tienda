@@ -20,7 +20,7 @@ export class AuthService {
   // Constructor de la base de datos
   constructor(
     @InjectRepository(User)
-    private readonly userRespository: Repository<User>,
+    private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -30,13 +30,13 @@ export class AuthService {
       // Encriptar la contraseña
       // Forma en la que se encripta contraseña por medio de un hash
       const { password, ...userData } = createUserDto;
-      const user = this.userRespository.create({
+      const user = this.userRepository.create({
         ...userData,
         password: bcrypt.hashSync(password, 10),
       });
 
       // Guardar el usuario en la base de datos
-      await this.userRespository.save(user);
+      await this.userRepository.save(user);
 
       // Eliminar la contraseña del objeto de usuario
       delete user.password;
@@ -55,7 +55,7 @@ export class AuthService {
     const { password, email } = loginUserDto;
 
     // Buscar al usuario por su correo
-    const user = await this.userRespository.findOne({
+    const user = await this.userRepository.findOne({
       where: { email },
       select: { email: true, password: true, id: true },
     });
@@ -87,6 +87,7 @@ export class AuthService {
     if (error.code === '23505') {
       throw new BadRequestException(error.detail);
     }
+
     // Manejo del error si el servidor no puede procesar la solicitud
     console.log(error);
     throw new InternalServerErrorException('Server logs');
