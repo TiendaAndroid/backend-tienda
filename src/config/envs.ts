@@ -3,11 +3,11 @@ import * as joi from 'joi';
 
 /**
  * Configuración y validación de las variables de entorno necesarias para la aplicación.
- * 
+ *
  * Este módulo se encarga de definir y validar las variables de entorno necesarias
  * para que la aplicación funcione correctamente. Si alguna variable obligatoria
  * no está definida o es incorrecta, se lanza un error.
- * 
+ *
  * @author Fidel Bonilla
  */
 
@@ -21,6 +21,9 @@ interface EnvVars {
   DB_NAME: string;
   JWT_SECRET: string;
   HOST_API: string;
+  CLOUDINARY_CLOUD_NAME: string;
+  CLOUDINARY_API_KEY: string;
+  CLOUDINARY_API_SECRET: string;
 }
 
 // Validación de las variables de entorno
@@ -34,6 +37,9 @@ const envsSchema = joi
     DB_NAME: joi.string().required(),
     JWT_SECRET: joi.string().required(),
     HOST_API: joi.string().required(),
+    CLOUDINARY_CLOUD_NAME: joi.string().required(),
+    CLOUDINARY_API_KEY: joi.string().required(),
+    CLOUDINARY_API_SECRET: joi.string().required(),
   })
   .unknown(true);
 
@@ -49,7 +55,7 @@ const envVars: EnvVars = value;
 
 /**
  * Exportación de las variables de entorno para su uso en otras partes de la aplicación.
- * 
+ *
  * Este objeto contiene las variables de entorno necesarias para la configuración de la
  * aplicación, todas ellas validadas y aseguradas de estar presentes.
  */
@@ -62,4 +68,7 @@ export const envs = {
   db_name: envVars.DB_NAME,
   jwt_secret: envVars.JWT_SECRET,
   host_api: envVars.HOST_API,
+  cloudinary_cloud_name: envVars.CLOUDINARY_CLOUD_NAME,
+  cloudinary_api_key: envVars.CLOUDINARY_API_KEY,
+  cloudinary_api_secret: envVars.CLOUDINARY_API_SECRET,
 };
