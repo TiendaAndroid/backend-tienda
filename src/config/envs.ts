@@ -1,8 +1,15 @@
 import 'dotenv/config';
 import * as joi from 'joi';
 
-// Creación de manejo de variables de entorno para poder ejecutar correctamente el código
-// Autor: Fidel Bonilla
+/**
+ * Configuración y validación de las variables de entorno necesarias para la aplicación.
+ * 
+ * Este módulo se encarga de definir y validar las variables de entorno necesarias
+ * para que la aplicación funcione correctamente. Si alguna variable obligatoria
+ * no está definida o es incorrecta, se lanza un error.
+ * 
+ * @author Fidel Bonilla
+ */
 
 // Interface de los valores de las variables de entorno que se quieren recibir
 interface EnvVars {
@@ -40,7 +47,12 @@ if (error) {
 // Valores de las variables de entorno
 const envVars: EnvVars = value;
 
-// Exportar las variables de entorno
+/**
+ * Exportación de las variables de entorno para su uso en otras partes de la aplicación.
+ * 
+ * Este objeto contiene las variables de entorno necesarias para la configuración de la
+ * aplicación, todas ellas validadas y aseguradas de estar presentes.
+ */
 export const envs = {
   port: envVars.PORT,
   db_host: envVars.DB_HOST,

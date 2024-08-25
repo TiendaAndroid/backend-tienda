@@ -14,6 +14,14 @@ import { PostgreSQLErrorCodes } from 'src/common/enums/db-error.code.enum';
 import { isUUID } from 'class-validator';
 import { Product, ProductImage } from './entities';
 
+/**
+ * Servicio para gestionar productos en la aplicación.
+ *
+ * Este servicio proporciona métodos para crear, buscar, actualizar y eliminar productos.
+ * Además, maneja la lógica de persistencia en la base de datos y el manejo de errores.
+ *
+ * @author Fidel Bonilla
+ */
 @Injectable()
 export class ProductsService {
   private readonly _logger = new Logger('ProductsService');
@@ -25,6 +33,19 @@ export class ProductsService {
     private readonly dataSource: DataSource,
   ) {}
 
+  /**
+   * Crea un nuevo producto en la base de datos.
+   *
+   * Este método recibe los detalles del producto, incluyendo las imágenes, y guarda el producto en la base de datos.
+   *
+   * @param createProductDto - Los detalles del producto a crear.
+   *
+   * @returns El producto creado con las imágenes asociadas.
+   *
+   * @throws {BadRequestException} Si ocurre un error durante la operación de base de datos.
+   *
+   * @author Fidel Bonilla
+   */
   async create(createProductDto: CreateProductDto) {
     try {
       const { image = [], ...productDetails } = createProductDto;
@@ -40,6 +61,19 @@ export class ProductsService {
     }
   }
 
+  /**
+   * Encuentra todos los productos con paginación.
+   *
+   * Este método devuelve una lista de productos activos con soporte para paginación.
+   *
+   * @param paginationDto - Detalles de la paginación (límites y desplazamiento).
+   *
+   * @returns Un objeto que contiene los productos, el total de resultados y detalles de paginación.
+   *
+   * @throws {NotFoundException} Si no se encuentran productos.
+   *
+   * @author Fidel Bonilla
+   */
   async findAll({ limit = 10, offset = 0 }: PaginationDto) {
     const { 0: data, 1: totalResults } =
       await this.productRepository.findAndCount({
@@ -57,6 +91,19 @@ export class ProductsService {
     return { limit, offset, partialResults: data.length, totalResults, data };
   }
 
+  /**
+   * Encuentra un producto por su ID.
+   *
+   * Este método busca un producto por su ID. Solo se consideran IDs válidos en formato UUID.
+   *
+   * @param id - El ID del producto a buscar.
+   *
+   * @returns El producto encontrado.
+   *
+   * @throws {NotFoundException} Si no se encuentra el producto con el ID especificado.
+   *
+   * @author Fidel Bonilla
+   */
   async findOne(id: string) {
     let product: Product;
     if (isUUID(id)) {
@@ -70,6 +117,17 @@ export class ProductsService {
     return product;
   }
 
+  /**
+   * Encuentra un producto y devuelve su representación en formato simple.
+   *
+   * Este método busca un producto y devuelve sus detalles junto con las URLs de las imágenes.
+   *
+   * @param term - El ID o término de búsqueda del producto.
+   *
+   * @returns Un objeto con los detalles del producto y sus imágenes.
+   *
+   * @author Fidel Bonilla
+   */
   async findOnePlain(term: string) {
     const { image = [], ...rest } = await this.findOne(term);
     return {
@@ -78,6 +136,21 @@ export class ProductsService {
     };
   }
 
+  /**
+   * Actualiza un producto existente.
+   *
+   * Este método actualiza un producto con los detalles proporcionados. Si se incluyen imágenes, las imágenes existentes se eliminan y se guardan las nuevas imágenes.
+   *
+   * @param id - El ID del producto a actualizar.
+   * @param updateProductDto - Los detalles del producto a actualizar.
+   *
+   * @returns El producto actualizado.
+   *
+   * @throws {NotFoundException} Si no se encuentra el producto con el ID especificado.
+   * @throws {BadRequestException} Si ocurre un error durante la operación de base de datos.
+   *
+   * @author Fidel Bonilla
+   */
   async update(id: string, updateProductDto: UpdateProductDto) {
     const { image, ...toUpdate } = updateProductDto;
     const product = await this.productRepository.preload({
@@ -112,6 +185,19 @@ export class ProductsService {
     }
   }
 
+  /**
+   * Elimina un producto al marcarlo como inactivo.
+   *
+   * Este método marca un producto como inactivo en lugar de eliminarlo físicamente de la base de datos.
+   *
+   * @param id - El ID del producto a eliminar.
+   *
+   * @returns El producto marcado como inactivo.
+   *
+   * @throws {NotFoundException} Si no se encuentra el producto con el ID especificado.
+   *
+   * @author Fidel Bonilla
+   */
   async remove(id: string) {
     const product = await this.findOne(id);
 
@@ -125,6 +211,18 @@ export class ProductsService {
     return product;
   }
 
+  /**
+   * Maneja las excepciones relacionadas con la base de datos.
+   *
+   * Este método analiza el error recibido y lanza una excepción adecuada en función del código de error de PostgreSQL.
+   *
+   * @param error - El error de la base de datos que se está manejando.
+   *
+   * @throws {BadRequestException} Si el error es por violación de restricciones NOT NULL o UNIQUE.
+   * @throws {InternalServerErrorException} Para errores inesperados.
+   *
+   * @author Fidel Bonilla
+   */
   private _handleDBException(error: any) {
     if (error.code === PostgreSQLErrorCodes.NOT_NULL_VIOLATION)
       throw new BadRequestException(error.detail);

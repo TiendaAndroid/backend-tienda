@@ -1,4 +1,13 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Direction } from 'src/directions/entities/direction.entity';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 // Entidad del usuario creado para la base de datos
 // Autor: Fidel Bonilla
@@ -35,6 +44,12 @@ export class User {
   })
   role: string[];
 
+  @OneToMany(() => Direction, (direction) => direction.user, {
+    onDelete: 'CASCADE',
+    eager: true,
+  })
+  direction?: Direction;
+
   @BeforeInsert()
   checkFieldsBeforeInsert() {
     this.email = this.email.toLowerCase().trim();
@@ -42,6 +57,6 @@ export class User {
 
   @BeforeUpdate()
   checkFieldsBeforeUpdate() {
-    this.checkFieldsBeforeInsert 
+    this.checkFieldsBeforeInsert;
   }
 }
