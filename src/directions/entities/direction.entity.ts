@@ -31,8 +31,8 @@ export class Direction {
   @Column('text')
   noExterior: string;
 
-  @Column('text')
-  noInterior: string;
+  @Column('text', { nullable: true })
+  noInterior?: string;
 
   @Column('text')
   colonia: string;

@@ -37,9 +37,4 @@ export class CreateUserDto {
   @IsString()
   @MinLength(1)
   lastName: string;
-
-  @IsOptional()
-  @IsString({ each: true })
-  @IsArray()
-  direction: string[];
 }
