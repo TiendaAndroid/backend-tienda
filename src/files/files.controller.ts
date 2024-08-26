@@ -6,10 +6,11 @@ import {
   Post,
   Res,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesService } from './files.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { fileFilter, fileNamer } from './helpers';
 import { Response } from 'express';
@@ -60,34 +61,36 @@ export class FilesController {
    */
   @Post('products')
   @UseInterceptors(
-    FileInterceptor('file', {
+    FilesInterceptor('files', 10, {
+      // Permite hasta 10 archivos
       fileFilter: fileFilter,
       limits: { fileSize: 500000 },
       storage: new CloudinaryStorage({
         cloudinary: cloudinary,
         params: {
-          resource_type: 'image', // Ensure this is an image type
-          folder: 'products', // Upload to the products folder
+          resource_type: 'image',
+          folder: 'products',
           transformation: [
             {
-              width: 800, // Set max width
-              height: 800, // Set max height
-              crop: 'limit', // Crop mode to limit dimensions
-              quality: 'auto', // Auto optimize quality
-              fetch_format: 'auto', // Automatically select best format (e.g., WebP)
+              width: 800,
+              height: 800,
+              crop: 'limit',
+              quality: 'auto',
+              fetch_format: 'auto',
             },
           ],
         } as any,
       }),
     }),
   )
-  uploadProductImage(@UploadedFile() file: Express.Multer.File) {
-    if (!file) {
-      throw new BadRequestException('Send a image file');
+  async uploadProductImages(@UploadedFiles() files: Express.Multer.File[]) {
+    if (!files || files.length === 0) {
+      throw new BadRequestException('Send image files');
     }
-    const secureUrl = file.path;
+  
+    const secureUrls = files.map(file => file.path);
     return {
-      secureUrl,
+      secureUrls,
     };
   }
 }

@@ -14,7 +14,7 @@ import { ProductImage } from './product-image.entity';
  * Esta entidad almacena información sobre los productos, incluyendo su precio, nombre, descripción,
  * imágenes asociadas, y otros detalles relevantes. La entidad también gestiona las relaciones con
  * otras entidades, como las imágenes del producto.
- * 
+ *
  *
  * @author Fidel Bonilla
  */
@@ -111,10 +111,10 @@ export class Product {
    *
    * @type {number[]}
    */
-  @Column('float', {
+  @Column('text', {
     array: true,
   })
-  size: number[];
+  size: string[];
 
   /**
    * Cantidad de unidades en stock.

@@ -102,9 +102,9 @@ export class CreateProductDto {
    *
    * @type {number[]}
    */
-  @IsNumber({}, { each: true })
+  @IsString({ each: true })
   @IsArray()
-  size: number[];
+  size: string[];
 
   /**
    * Cantidad de unidades en stock.
