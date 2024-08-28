@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseUUIDPipe,
+  Query,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -14,8 +24,21 @@ export class ProductsController {
   }
 
   @Get()
-  findAll(@Query() paginationDto: PaginationDto ) {
-    return this.productsService.findAll( paginationDto );
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.productsService.findAll(paginationDto);
+  }
+
+  @Get('/color/:color')
+  findColor(
+    @Param('color') color: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.productsService.findColor(color, paginationDto);
+  }
+
+  @Get('/size/:size')
+  findSize(@Param('size') size: string, @Query() paginationDto: PaginationDto) {
+    return this.productsService.findSize(size, paginationDto);
   }
 
   @Get(':id')
@@ -24,7 +47,10 @@ export class ProductsController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateProductDto: UpdateProductDto) {
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
     return this.productsService.update(id, updateProductDto);
   }
 

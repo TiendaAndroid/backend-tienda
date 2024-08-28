@@ -8,7 +8,7 @@ import {
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Raw, Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { PostgreSQLErrorCodes } from 'src/common/enums/db-error.code.enum';
 import { isUUID } from 'class-validator';
@@ -88,6 +88,46 @@ export class ProductsService {
       });
     if (!data.length || totalResults == 0)
       throw new NotFoundException(`There aren't results for the search`);
+    return { limit, offset, partialResults: data.length, totalResults, data };
+  }
+
+  async findColor(color: string, { limit = 10, offset = 0 }: PaginationDto) {
+    const [data, totalResults] = await this.productRepository.findAndCount({
+      where: {
+        isActive: true,
+        color: Raw(alias => `${alias} @> ARRAY['${color}']::text[]`), // Usa la función ANY de PostgreSQL
+      },
+      take: limit,
+      skip: offset,
+      relations: {
+        image: true,
+      },
+    });
+
+    if (!data.length || totalResults === 0) {
+      throw new NotFoundException(`There aren't results for the search`);
+    }
+
+    return { limit, offset, partialResults: data.length, totalResults, data };
+  }
+
+  async findSize(size: string, { limit = 10, offset = 0 }: PaginationDto) {
+    const [data, totalResults] = await this.productRepository.findAndCount({
+      where: {
+        isActive: true,
+        size: Raw(alias => `${alias} @> ARRAY['${size}']::text[]`), 
+      },
+      take: limit,
+      skip: offset,
+      relations: {
+        image: true,
+      },
+    });
+
+    if (!data.length || totalResults === 0) {
+      throw new NotFoundException(`There aren't results for the search`);
+    }
+
     return { limit, offset, partialResults: data.length, totalResults, data };
   }
 
