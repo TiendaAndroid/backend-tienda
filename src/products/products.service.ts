@@ -91,6 +91,21 @@ export class ProductsService {
     return { limit, offset, partialResults: data.length, totalResults, data };
   }
 
+  /**
+   * Encuentra todos los productos con un color específico con paginación.
+   *
+   * Este método devuelve una lista de productos activos y con el color indicado con soporte para paginación.
+   * 
+   * @param color - Color de los productos que quieres mostrar.
+   *
+   * @param paginationDto - Detalles de la paginación (límites y desplazamiento).
+   *
+   * @returns Un objeto que contiene los productos, el total de resultados y detalles de paginación.
+   *
+   * @throws {NotFoundException} Si no se encuentran productos.
+   *
+   * @author Fidel Bonilla
+   */
   async findColor(color: string, { limit = 10, offset = 0 }: PaginationDto) {
     const [data, totalResults] = await this.productRepository.findAndCount({
       where: {
@@ -111,6 +126,21 @@ export class ProductsService {
     return { limit, offset, partialResults: data.length, totalResults, data };
   }
 
+  /**
+   * Encuentra todos los productos con un color específico con paginación.
+   *
+   * Este método devuelve una lista de productos activos y con el color indicado con soporte para paginación.
+   * 
+   * @param size - Tamaño de los productos que quieres mostrar.
+   *
+   * @param paginationDto - Detalles de la paginación (límites y desplazamiento).
+   *
+   * @returns Un objeto que contiene los productos, el total de resultados y detalles de paginación.
+   *
+   * @throws {NotFoundException} Si no se encuentran productos.
+   *
+   * @author Fidel Bonilla
+   */
   async findSize(size: string, { limit = 10, offset = 0 }: PaginationDto) {
     const [data, totalResults] = await this.productRepository.findAndCount({
       where: {
