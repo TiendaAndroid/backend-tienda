@@ -9,11 +9,7 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   app.setGlobalPrefix('api');
-  app.enableCors({
-    origin: 'http://localhost:3001', // Specify the origin of your frontend
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
+  app.enableCors();
   
   app.useGlobalPipes(
     new ValidationPipe({

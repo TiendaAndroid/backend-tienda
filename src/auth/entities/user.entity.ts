@@ -1,11 +1,15 @@
+import { Cart } from 'src/cart/entities/cart.entity';
 import { Direction } from 'src/directions/entities/direction.entity';
+import { Order } from 'src/orders/entities';
 import {
   BeforeInsert,
   BeforeUpdate,
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -23,15 +27,20 @@ export class User {
   email: string;
 
   @Column('text', {
-    select: false,
+    nullable: true,
   })
-  password: string;
+  password?: string;
 
   @Column('text')
   name: string;
 
   @Column('text')
   lastName: string;
+
+  @Column('text', {
+    nullable: true,
+  })
+  googleId?: string;
 
   @Column('bool', {
     default: true,
@@ -49,6 +58,16 @@ export class User {
     eager: true,
   })
   direction?: Direction;
+
+  @OneToOne(() => Cart, (cart) => cart.user, {
+    eager: true,
+  })
+  cart?: Cart;
+
+  @OneToMany(() => Order, (order) => order.user, {
+    eager: true,
+  })
+  orders?: Order[];
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {

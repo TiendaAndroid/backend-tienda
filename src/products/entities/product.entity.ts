@@ -3,10 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { ProductImage } from './product-image.entity';
+import { CartItems } from 'src/cart/entities/cart-item.entity';
+import { OrderItems } from 'src/orders/entities';
 
 /**
  * Entidad que representa un producto en el sistema.
@@ -135,6 +138,12 @@ export class Product {
     default: true,
   })
   isActive: boolean;
+
+  @OneToOne(() => CartItems)
+  cartItems: CartItems;
+
+  @OneToOne(() => OrderItems)
+  orderItems: OrderItems;
 
   /**
    * Fecha y hora en que se creó el producto.

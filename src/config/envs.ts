@@ -24,6 +24,9 @@ interface EnvVars {
   CLOUDINARY_CLOUD_NAME: string;
   CLOUDINARY_API_KEY: string;
   CLOUDINARY_API_SECRET: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  GOOGLE_CALLBACK_URL: string;
 }
 
 // Validación de las variables de entorno
@@ -40,6 +43,9 @@ const envsSchema = joi
     CLOUDINARY_CLOUD_NAME: joi.string().required(),
     CLOUDINARY_API_KEY: joi.string().required(),
     CLOUDINARY_API_SECRET: joi.string().required(),
+    GOOGLE_CLIENT_ID: joi.string().required(),
+    GOOGLE_CLIENT_SECRET: joi.string().required(),
+    GOOGLE_CALLBACK_URL: joi.string().required(),
   })
   .unknown(true);
 
@@ -71,4 +77,7 @@ export const envs = {
   cloudinary_cloud_name: envVars.CLOUDINARY_CLOUD_NAME,
   cloudinary_api_key: envVars.CLOUDINARY_API_KEY,
   cloudinary_api_secret: envVars.CLOUDINARY_API_SECRET,
+  google_client_id: envVars.GOOGLE_CLIENT_ID,
+  google_client_secret: envVars.GOOGLE_CLIENT_SECRET,
+  google_callback_url: envVars.GOOGLE_CALLBACK_URL,
 };

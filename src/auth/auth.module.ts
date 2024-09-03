@@ -8,14 +8,16 @@ import { JwtModule } from '@nestjs/jwt';
 import { envs } from 'src/config';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt-strategy';
+import { GoogleStrategy } from './strategies/google-strategy';
+import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, GoogleStrategy,GoogleAuthGuard],
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([User]),
-    
+
     // Json Web Token para el registro
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

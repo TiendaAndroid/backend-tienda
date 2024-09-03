@@ -11,7 +11,7 @@ import {
   SetMetadata,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto, LoginUserDto } from './dto';
+import { CreateUserDto, LoginGoogleDto, LoginUserDto } from './dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from './entities/user.entity';
 import { RawHeaders, GetUser, RoleProtected, Auth } from './decorators';
@@ -59,5 +59,25 @@ export class AuthController {
       ok: true,
       user,
     };
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Req() req) {}
+
+  // Google callback
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  googleAuthRedirect(@Req() req) {
+    const { email, firstName: name, lastName: lastName, googleId } = req.user;
+
+    const loginGoogleDto: LoginGoogleDto = {
+      email,
+      name,
+      lastName,
+      googleId,
+    };
+
+    return this.authService.googleLogin(loginGoogleDto);
   }
 }
