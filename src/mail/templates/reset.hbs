@@ -1,0 +1,85 @@
+<style>
+     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+     
+     * {
+       font-family: 'Poppins', system-ui;
+       padding: 0;
+       margin: 0;
+       box-sizing: border-box;
+     }
+   
+     body {
+       background-color: #f4f4f4;
+       padding: 20px;
+     }
+   
+     .container-content {
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       min-height: 100vh;
+     }
+   
+     .card {
+       border-radius: 15px;
+       background-color: white;
+       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+       text-align: center;
+       padding: 40px;
+       width: 100%;
+       max-width: 400px;
+     }
+   
+     .card-header h1 {
+       font-size: 24px;
+       margin-bottom: 20px;
+       color: #333;
+     }
+   
+     .card-body img {
+       margin: 20px 0;
+       width: 120px;
+       height: 120px;
+       border-radius: 50%;
+       object-fit: cover;
+     }
+   
+     .card-body p {
+       margin: 20px 0;
+       color: #555;
+       font-size: 16px;
+     }
+   
+     .card-body a {
+       display: inline-block;
+       background-color: #ff6f61;
+       color: white;
+       text-decoration: none;
+       padding: 12px 25px;
+       border-radius: 30px;
+       margin-top: 20px;
+       font-weight: bold;
+       transition: background-color 0.3s ease;
+     }
+   
+     .card-body a:hover {
+       background-color: #ff4040;
+     }
+   </style>
+   
+   <div class='container-content'>
+     <div class='card'>
+       <div class='card-header'>
+         <h1><strong>Restablecer Contraseña</strong></h1>
+       </div>
+       <div class='card-body'>
+         <img
+           src='https://res.cloudinary.com/dfpd4ucjw/image/upload/v1725594293/products/qk8uh1yrkhkf6eyh4dxj.jpg'
+           alt='Email image'
+         />
+         <p>Haz clic en el siguiente botón para restablecer tu contraseña</p>
+         <a href={{token}}>Restablecer</a>
+       </div>
+     </div>
+   </div>
+   

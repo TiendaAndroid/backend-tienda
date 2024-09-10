@@ -10,13 +10,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt-strategy';
 import { GoogleStrategy } from './strategies/google-strategy';
 import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
+import { VerifyUser } from './entities/verify-user.entity';
+import { MailService } from 'src/mail/mail.service';
+import { ResetPassword } from './entities/reset-password.entity';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy,GoogleAuthGuard],
+  providers: [AuthService, JwtStrategy, GoogleStrategy,GoogleAuthGuard, MailService],
   imports: [
     ConfigModule,
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, VerifyUser, ResetPassword]),
 
     // Json Web Token para el registro
     PassportModule.register({ defaultStrategy: 'jwt' }),

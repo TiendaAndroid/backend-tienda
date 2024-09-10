@@ -8,9 +8,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
-import { LoginUserDto, CreateUserDto, LoginGoogleDto } from './dto';
+import {
+  LoginUserDto,
+  CreateUserDto,
+  LoginGoogleDto,
+  ChangePasswordDto,
+} from './dto';
 import { JwtPayload } from './interface/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
+import { MailService } from 'src/mail/mail.service';
+import { VerifyUserDto } from './dto/verify-user.dto';
+import { VerifyUser } from './entities/verify-user.entity';
+import { ResetPassword } from './entities/reset-password.entity';
+import { v4 as uuidv4 } from 'uuid';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 // Funciones de la autenticación del usuario
 // Autor: Fidel Bonilla
@@ -21,32 +32,158 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(VerifyUser)
+    private readonly verifyUserRepository: Repository<VerifyUser>,
+    @InjectRepository(ResetPassword)
+    private readonly resetPassRepository: Repository<ResetPassword>,
     private readonly jwtService: JwtService,
+    private mailService: MailService,
   ) {}
+
+  async mail(verifyUserDto: VerifyUserDto) {
+    const token = Math.floor(1000 + Math.random() * 9000).toString();
+    verifyUserDto.token = token;
+    try {
+      let showUser = await this.userRepository.findOne({
+        where: { email: verifyUserDto.email },
+      });
+      if (showUser) {
+        throw new BadRequestException('El correo ya esta registrado');
+      }
+
+      // Buscar al usuario por su email
+      let user = await this.verifyUserRepository.findOne({
+        where: { email: verifyUserDto.email },
+      });
+
+      // Si el usuario no existe, crear una nueva instancia y guardarla
+      if (!user) {
+        user = this.verifyUserRepository.create(verifyUserDto);
+        await this.verifyUserRepository.save(user);
+      }
+
+      await this.mailService.sendUserConfirmation(user);
+      return ['Mail sended'];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async mailResetPassword(resetPasswordDto: ResetPasswordDto) {
+    const token = uuidv4();
+    try {
+      let showUser = await this.userRepository.findOne({
+        where: { email: resetPasswordDto.email },
+      });
+      if (!showUser) {
+        throw new BadRequestException('El correo no esta registrado');
+      }
+
+      // Buscar al usuario por su email
+      let user = await this.resetPassRepository.findOne({
+        where: { email: resetPasswordDto.email },
+      });
+
+      if (!user) {
+        const userCreate = this.resetPassRepository.create({
+          email: resetPasswordDto.email,
+          token: token,
+          dateValid: new Date(Date.now() + 15 * 60 * 1000),
+        });
+        await this.resetPassRepository.save(userCreate);
+        await this.mailService.sendUserResetPassword(userCreate);
+        return ['Mail sended'];
+      } else {
+        user.token = token;
+        user.dateValid = new Date(Date.now() + 15 * 60 * 1000);
+        await this.resetPassRepository.save(user);
+        await this.mailService.sendUserResetPassword(user);
+        return ['Mail sended'];
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getResetPass(token: string) {
+    try {
+      const user = await this.resetPassRepository.findOne({ where: { token } });
+
+      if (!user || (user.dateValid && new Date(user.dateValid) < new Date())) {
+        throw new BadRequestException('Usuario no encontrado');
+      }
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async changePassword(changePasswordDto: ChangePasswordDto): Promise<User> {
+    try {
+      const passUser = await this.resetPassRepository.findOne({
+        where: { token: changePasswordDto.token },
+      });
+
+      if (
+        !passUser ||
+        (passUser.dateValid && new Date(passUser.dateValid) < new Date())
+      ) {
+        throw new BadRequestException('Usuario no encontrado');
+      }
+
+      await this.resetPassRepository.delete(passUser);
+
+      // Buscar al usuario por su ID
+      const user = await this.userRepository.findOne({
+        where: { email: passUser.email },
+      });
+
+      const password = bcrypt.hashSync(changePasswordDto.newPassword, 10);
+
+      user.password = password;
+
+      await this.userRepository.save(user);
+
+      delete user.password;
+
+      return user;
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
 
   // Método para crear un usuario, al registrar
   async create(createUserDto: CreateUserDto) {
     try {
-      const { email, password, ...userData } = createUserDto;
-  
+      const { email, password, token, ...userData } = createUserDto;
+
       // Verificar si el correo ya existe en la base de datos
-      const existingUser = await this.userRepository.findOne({ where: { email } });
-  
+      const existingUser = await this.userRepository.findOne({
+        where: { email },
+      });
+
       if (existingUser) {
         // Verificar si el usuario tiene un googleId
         if (existingUser.googleId) {
           // Si tiene un googleId y no tiene contraseña, actualizar la contraseña
           if (!existingUser.password) {
-            existingUser.password = bcrypt.hashSync(password, 10);
-            await this.userRepository.save(existingUser);
-            delete existingUser.password;
-            return {
-              ...existingUser,
-              token: this.getJwtToken({ id: existingUser.id }),
-            };
+            let userEmail = await this.verifyUserRepository.findOne({
+              where: { email: createUserDto.email },
+            });
+            const tokenGive = userEmail.token;
+            if (tokenGive !== token) {
+              existingUser.password = bcrypt.hashSync(password, 10);
+              await this.userRepository.save(existingUser);
+              delete existingUser.password;
+              await this.verifyUserRepository.delete(userEmail);
+              return {
+                ...existingUser,
+                token: this.getJwtToken({ id: existingUser.id }),
+              };
+            }
           } else {
             // Si tiene una contraseña, lanzar un error indicando que el usuario ya existe
-            throw new BadRequestException("El correo ya esta registrado")
+            throw new BadRequestException('El correo ya esta registrado');
           }
         } else {
           // Si no tiene un googleId, lanzar un error indicando que el usuario ya existe
@@ -54,25 +191,35 @@ export class AuthService {
         }
       } else {
         // Si el correo no existe, crear el usuario normalmente
-        const user = this.userRepository.create({
-          ...userData,
-          email,
-          password: bcrypt.hashSync(password, 10),
+        let userEmail = await this.verifyUserRepository.findOne({
+          where: { email: createUserDto.email },
         });
-  
-        // Guardar el usuario en la base de datos
-        await this.userRepository.save(user);
-  
-        // Eliminar la contraseña del objeto de usuario
-        delete user.password;
-        return {
-          ...user,
-          token: this.getJwtToken({ id: user.id }),
-        };
+        const tokenGive = userEmail.token;
+        if (tokenGive !== token) {
+          throw new BadRequestException('El token no es valido');
+        } else {
+          const user = this.userRepository.create({
+            ...userData,
+            email,
+            password: bcrypt.hashSync(password, 10),
+          });
+
+          await this.verifyUserRepository.delete(userEmail);
+
+          // Guardar el usuario en la base de datos
+          await this.userRepository.save(user);
+
+          // Eliminar la contraseña del objeto de usuario
+          delete user.password;
+          return {
+            ...user,
+            token: this.getJwtToken({ id: user.id }),
+          };
+        }
       }
     } catch (err) {
       // Manejo de errores
-      throw err
+      throw err;
     }
   }
 
@@ -90,8 +237,8 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Credentials are not valid (email)');
     }
-    
-    if(!user.password){
+
+    if (!user.password) {
       throw new UnauthorizedException('Usuario registrado solo con google');
     }
 
@@ -141,6 +288,74 @@ export class AuthService {
     return token;
   }
 
+  async findAll() {
+    try {
+      // Obtener todos los usuarios de la base de datos
+      const users = await this.userRepository.find();
+
+      // Excluir la contraseña de cada usuario
+      return users.map((user) => {
+        delete user.password;
+        return user;
+      });
+    } catch (error) {
+      // Manejar errores utilizando el método handleError
+      this.handleError(error);
+    }
+  }
+
+  async changeUserRoleToAdmin(userId: string): Promise<User> {
+    try {
+      // Buscar al usuario por su ID
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+
+      // Si el usuario no existe, lanzar un error
+      if (!user) {
+        throw new BadRequestException('Usuario no encontrado');
+      }
+
+      // Cambiar el rol del usuario a administrador
+      user.role = ['user', 'admin'];
+
+      // Guardar los cambios en la base de datos
+      await this.userRepository.save(user);
+
+      // Eliminar la contraseña del objeto de usuario antes de devolverlo
+      delete user.password;
+
+      return user;
+    } catch (error) {
+      // Manejar errores utilizando el método handleError
+      this.handleError(error);
+    }
+  }
+
+  async changeUserRoleToUser(userId: string): Promise<User> {
+    try {
+      // Buscar al usuario por su ID
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+
+      // Si el usuario no existe, lanzar un error
+      if (!user) {
+        throw new BadRequestException('Usuario no encontrado');
+      }
+
+      // Cambiar el rol del usuario a administrador
+      user.role = ['user'];
+
+      // Guardar los cambios en la base de datos
+      await this.userRepository.save(user);
+
+      // Eliminar la contraseña del objeto de usuario antes de devolverlo
+      delete user.password;
+
+      return user;
+    } catch (error) {
+      // Manejar errores utilizando el método handleError
+      this.handleError(error);
+    }
+  }
+
   // Método para controlar los errores que aparecen en las pruebas
   private handleError(error: any): never {
     // Manejo del error si el usuario se registra 2 veces con el mismo correo
@@ -148,8 +363,6 @@ export class AuthService {
       throw new BadRequestException(error.detail);
     }
 
-    // Manejo del error si el servidor no puede procesar la solicitud
-    console.log(error);
     throw new InternalServerErrorException('Server logs');
   }
 }

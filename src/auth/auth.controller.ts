@@ -9,13 +9,16 @@ import {
   UseGuards,
   Req,
   SetMetadata,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto, LoginGoogleDto, LoginUserDto } from './dto';
+import { ChangePasswordDto, CreateUserDto, LoginGoogleDto, LoginUserDto } from './dto';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from './entities/user.entity';
 import { RawHeaders, GetUser, RoleProtected, Auth } from './decorators';
 import { ValidRoles } from './interface';
+import { VerifyUserDto } from './dto/verify-user.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 // Este controlador es responsable de manejar las solicitudes de los usuarios
 // Autor: Fidel Bonilla
@@ -38,8 +41,6 @@ export class AuthController {
   @UseGuards(AuthGuard())
   privateRoute(
     @GetUser() user: User,
-
-    // Se da el objeto que se quiere recibir del usuario
     @GetUser('email') userEmail: string,
     @RawHeaders() rawHeaders: string,
   ) {
@@ -55,15 +56,45 @@ export class AuthController {
   @Get('private-roles')
   @Auth(ValidRoles.admin)
   privateRouteRoles(@GetUser() user: User) {
-    return {
-      ok: true,
-      user,
-    };
+    return this.authService.findAll();
+  }
+
+  @Post('email')
+  send(@Body() verifyUserDto: VerifyUserDto) {
+    return this.authService.mail(verifyUserDto);
+  }
+
+  @Post('email/reset')
+  sendReset(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.mailResetPassword(resetPasswordDto);
   }
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth(@Req() req) {}
+
+  @Patch('createAdmin/:id')
+  @Auth(ValidRoles.admin)
+  changeRoleAdmin(@Param('id', ParseUUIDPipe) id: string) {
+    return this.authService.changeUserRoleToAdmin(id);
+  }
+
+  @Patch('createUser/:id')
+  @Auth(ValidRoles.admin)
+  changeRoleUser(@Param('id', ParseUUIDPipe) id: string) {
+    return this.authService.changeUserRoleToUser(id);
+  }
+
+  @Patch('change/password')
+  changePasswordUser(@Body() changePasswordDto: ChangePasswordDto) {
+    return this.authService.changePassword(changePasswordDto)
+  }
+
+
+  @Get('change/password/:id')
+  changePassword(@Param('id') id: string) {
+    return this.authService.getResetPass(id);
+  }
 
   // Google callback
   @Get('google/callback')
