@@ -30,7 +30,7 @@ import { ResetPassword } from './entities/reset-password.entity';
         return {
           secret: envs.jwt_secret,
           signOptions: {
-            expiresIn: '2d',
+            expiresIn: '30d',
           },
         };
       },

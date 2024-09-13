@@ -36,4 +36,7 @@ export class Direction {
 
   @Column('text')
   colonia: string;
+
+  @Column('int')
+  cp: number;
 }

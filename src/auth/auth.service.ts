@@ -118,6 +118,25 @@ export class AuthService {
     }
   }
 
+  async getProfile(userId: string) {
+    try {
+      // Buscar al usuario por su ID
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+
+      // Si el usuario no existe, lanzar un error
+      if (!user) {
+        throw new BadRequestException('Usuario no encontrado');
+      }
+
+      delete user.password;
+
+      return user;
+    } catch (error) {
+      // Manejar errores utilizando el método handleError
+      this.handleError(error);
+    }
+  }
+
   async changePassword(changePasswordDto: ChangePasswordDto): Promise<User> {
     try {
       const passUser = await this.resetPassRepository.findOne({

@@ -19,6 +19,7 @@ import { RawHeaders, GetUser, RoleProtected, Auth } from './decorators';
 import { ValidRoles } from './interface';
 import { VerifyUserDto } from './dto/verify-user.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { JwtAuthGuard } from './guards/jwt/jwt-auth.guard';
 
 // Este controlador es responsable de manejar las solicitudes de los usuarios
 // Autor: Fidel Bonilla
@@ -57,6 +58,12 @@ export class AuthController {
   @Auth(ValidRoles.admin)
   privateRouteRoles(@GetUser() user: User) {
     return this.authService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  async getProfile(@Req() req) {
+    return this.authService.getProfile(req.user.id);
   }
 
   @Post('email')

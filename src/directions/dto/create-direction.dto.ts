@@ -1,11 +1,8 @@
 import { User } from 'src/auth/entities/user.entity';
 import { TipoVivienda } from '../entities/tipo.enum';
-import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateDirectionDto {
-  @IsUUID()
-  user: User;
-
   @IsEnum(TipoVivienda)
   tipo: TipoVivienda;
 
@@ -30,4 +27,7 @@ export class CreateDirectionDto {
 
   @IsString()
   colonia: string;
+  
+  @IsNumber()
+  cp: number;
 }

@@ -9,42 +9,58 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Direction } from './entities/direction.entity';
 import { Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
+import { User } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class DirectionsService {
   constructor(
     @InjectRepository(Direction)
     private readonly directionsRepository: Repository<Direction>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
-  async create(createDirectionDto: CreateDirectionDto) {
+  async create(userId: string, createDirectionDto: CreateDirectionDto) {
     try {
-      const direction = this.directionsRepository.create(createDirectionDto);
-      await this.directionsRepository.save(direction);
-      return direction;
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new BadRequestException('Usuario no encontrado');
+      }
+      const direction = this.directionsRepository.create({
+        ...createDirectionDto,
+        user: user,
+      });
+      const savedDirection = await this.directionsRepository.save(direction);
+      return savedDirection;
     } catch (error) {
       throw new BadRequestException(error.detail);
     }
   }
 
-  async findOne(id: string): Promise<Direction> {
-    let direction: Direction;
-    if (isUUID(id)) {
-      direction = await this.directionsRepository.findOne({
-        where: { id },
-      });
+  async findOne(userId: string): Promise<Direction> {
+    try {
+      // Buscar al usuario por su ID
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+
+      if (!user) {
+        throw new BadRequestException('Usuario no encontrado');
+      }
+
+      return user.direction;
+    } catch (error) {
+      // Manejar errores utilizando el método handleError
+      throw error;
     }
-    if (!direction) {
-      throw new NotFoundException(
-        `There are no results for the search. Search term: ${id}`,
-      );
-    }
-    return direction;
   }
 
   async update(
+    userId: string,
     id: string,
     updateDirectionDto: UpdateDirectionDto,
   ): Promise<Direction> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('Usuario no encontrado');
+    }
     if (!isUUID(id)) {
       throw new BadRequestException(
         'El ID proporcionado no es un UUID válido.',
@@ -52,7 +68,7 @@ export class DirectionsService {
     }
 
     const direction = await this.directionsRepository.findOne({
-      where: { id: id },
+      where: { id: id, user: user },
     });
 
     if (!direction) {
@@ -66,7 +82,12 @@ export class DirectionsService {
     return await this.directionsRepository.save(updatedDirection);
   }
 
-  async remove(id: string): Promise<void> {
+  async findOneDirection(userId: string, id: string){
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('Usuario no encontrado');
+    }
+
     if (!isUUID(id)) {
       throw new BadRequestException(
         'El ID proporcionado no es un UUID válido.',
@@ -74,7 +95,32 @@ export class DirectionsService {
     }
 
     const direction = await this.directionsRepository.findOne({
-      where: { id: id },
+      where: { id: id, user: user },
+    });
+
+    if (!direction) {
+      throw new NotFoundException(
+        'La dirección con el ID especificado no fue encontrada.',
+      );
+    }
+
+    return direction;
+  }
+
+  async remove(userId: string, id: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('Usuario no encontrado');
+    }
+
+    if (!isUUID(id)) {
+      throw new BadRequestException(
+        'El ID proporcionado no es un UUID válido.',
+      );
+    }
+
+    const direction = await this.directionsRepository.findOne({
+      where: { id: id, user: user },
     });
 
     if (!direction) {
@@ -84,5 +130,9 @@ export class DirectionsService {
     }
 
     await this.directionsRepository.remove(direction);
+
+    return {
+      message: 'Dirección eliminada',
+    };
   }
 }
