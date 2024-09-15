@@ -112,8 +112,6 @@ export class ProductsService {
         isActive: true,
         color: Raw((alias) => `${alias} @> ARRAY['${color}']::text[]`), // Usa la función ANY de PostgreSQL
       },
-      take: limit,
-      skip: offset,
       relations: {
         image: true,
       },
@@ -132,8 +130,6 @@ export class ProductsService {
         isActive: true,
         material: Raw((alias) => `${alias} @> ARRAY['${tipo}']::text[]`), // Usa el operador <@ de PostgreSQL
       },
-      take: limit,
-      skip: offset,
       relations: {
         image: true,
       },
@@ -167,8 +163,6 @@ export class ProductsService {
         isActive: true,
         size: Raw((alias) => `${alias} @> ARRAY['${size}']::text[]`),
       },
-      take: limit,
-      skip: offset,
       relations: {
         image: true,
       },
