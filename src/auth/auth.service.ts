@@ -22,6 +22,7 @@ import { VerifyUser } from './entities/verify-user.entity';
 import { ResetPassword } from './entities/reset-password.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { Cart } from 'src/cart/entities/cart.entity';
 
 // Funciones de la autenticación del usuario
 // Autor: Fidel Bonilla
@@ -36,6 +37,8 @@ export class AuthService {
     private readonly verifyUserRepository: Repository<VerifyUser>,
     @InjectRepository(ResetPassword)
     private readonly resetPassRepository: Repository<ResetPassword>,
+    @InjectRepository(Cart)
+    private readonly cartRepository: Repository<Cart>,
     private readonly jwtService: JwtService,
     private mailService: MailService,
   ) {}
@@ -51,12 +54,10 @@ export class AuthService {
         throw new BadRequestException('El correo ya esta registrado');
       }
 
-      // Buscar al usuario por su email
       let user = await this.verifyUserRepository.findOne({
         where: { email: verifyUserDto.email },
       });
 
-      // Si el usuario no existe, crear una nueva instancia y guardarla
       if (!user) {
         user = this.verifyUserRepository.create(verifyUserDto);
         await this.verifyUserRepository.save(user);
@@ -227,6 +228,9 @@ export class AuthService {
 
           // Guardar el usuario en la base de datos
           await this.userRepository.save(user);
+
+          const cart = this.cartRepository.create({ user });
+          await this.cartRepository.save(cart);
 
           // Eliminar la contraseña del objeto de usuario
           delete user.password;

@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
+import { UpdateCartItemDto } from './dto/update-cart.dto';
 import { Cart } from './entities/cart.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -75,6 +75,21 @@ export class CartService {
     } catch (error) {
       throw new BadRequestException(error.detail);
     }
+  }
+
+  async updateCartItem(id:string, updateCartItemDto: UpdateCartItemDto){
+    const cartItem = await this.cartItemRepository.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!cartItem) {
+      throw new NotFoundException(`Cart item with ID ${id} not found`);
+    }
+
+    await this.cartItemRepository.update(id, updateCartItemDto);
+    return cartItem;
   }
 
   async removeCartItem(id: string): Promise<CartItems> {

@@ -95,7 +95,7 @@ export class ProductsService {
    * Encuentra todos los productos con un color específico con paginación.
    *
    * Este método devuelve una lista de productos activos y con el color indicado con soporte para paginación.
-   * 
+   *
    * @param color - Color de los productos que quieres mostrar.
    *
    * @param paginationDto - Detalles de la paginación (límites y desplazamiento).
@@ -110,7 +110,27 @@ export class ProductsService {
     const [data, totalResults] = await this.productRepository.findAndCount({
       where: {
         isActive: true,
-        color: Raw(alias => `${alias} @> ARRAY['${color}']::text[]`), // Usa la función ANY de PostgreSQL
+        color: Raw((alias) => `${alias} @> ARRAY['${color}']::text[]`), // Usa la función ANY de PostgreSQL
+      },
+      take: limit,
+      skip: offset,
+      relations: {
+        image: true,
+      },
+    });
+
+    if (!data.length || totalResults === 0) {
+      throw new NotFoundException(`There aren't results for the search`);
+    }
+
+    return { limit, offset, partialResults: data.length, totalResults, data };
+  }
+
+  async findTipo(tipo: string, { limit = 10, offset = 0 }: PaginationDto) {
+    const [data, totalResults] = await this.productRepository.findAndCount({
+      where: {
+        isActive: true,
+        material: Raw((alias) => `${alias} @> ARRAY['${tipo}']::text[]`), // Usa el operador <@ de PostgreSQL
       },
       take: limit,
       skip: offset,
@@ -130,7 +150,7 @@ export class ProductsService {
    * Encuentra todos los productos con un color específico con paginación.
    *
    * Este método devuelve una lista de productos activos y con el color indicado con soporte para paginación.
-   * 
+   *
    * @param size - Tamaño de los productos que quieres mostrar.
    *
    * @param paginationDto - Detalles de la paginación (límites y desplazamiento).
@@ -145,7 +165,7 @@ export class ProductsService {
     const [data, totalResults] = await this.productRepository.findAndCount({
       where: {
         isActive: true,
-        size: Raw(alias => `${alias} @> ARRAY['${size}']::text[]`), 
+        size: Raw((alias) => `${alias} @> ARRAY['${size}']::text[]`),
       },
       take: limit,
       skip: offset,

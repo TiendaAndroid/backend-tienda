@@ -82,7 +82,7 @@ export class DirectionsService {
     return await this.directionsRepository.save(updatedDirection);
   }
 
-  async findOneDirection(userId: string, id: string){
+  async findOneDirection(userId: string, id: string) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new BadRequestException('Usuario no encontrado');
@@ -95,7 +95,7 @@ export class DirectionsService {
     }
 
     const direction = await this.directionsRepository.findOne({
-      where: { id: id, user: user },
+      where: { id: id, user: { id: userId } },
     });
 
     if (!direction) {
@@ -120,7 +120,7 @@ export class DirectionsService {
     }
 
     const direction = await this.directionsRepository.findOne({
-      where: { id: id, user: user },
+      where: { id: id, user: { id: userId } },
     });
 
     if (!direction) {

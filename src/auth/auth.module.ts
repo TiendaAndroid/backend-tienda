@@ -13,10 +13,12 @@ import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
 import { VerifyUser } from './entities/verify-user.entity';
 import { MailService } from 'src/mail/mail.service';
 import { ResetPassword } from './entities/reset-password.entity';
+import { CartModule } from 'src/cart/cart.module';
+import { CartService } from 'src/cart/cart.service';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy,GoogleAuthGuard, MailService],
+  providers: [AuthService, JwtStrategy, GoogleStrategy,GoogleAuthGuard, MailService, CartService],
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([User, VerifyUser, ResetPassword]),
@@ -35,6 +37,7 @@ import { ResetPassword } from './entities/reset-password.entity';
         };
       },
     }),
+    CartModule
   ],
   exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule],
 })

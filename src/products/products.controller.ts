@@ -36,6 +36,14 @@ export class ProductsController {
     return this.productsService.findColor(color, paginationDto);
   }
 
+  @Get('/tipo/:tipo')
+  findTipo(
+    @Param('tipo') tipo: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.productsService.findTipo(tipo, paginationDto);
+  }
+
   @Get('/size/:size')
   findSize(@Param('size') size: string, @Query() paginationDto: PaginationDto) {
     return this.productsService.findSize(size, paginationDto);
