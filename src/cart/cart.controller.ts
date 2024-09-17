@@ -8,6 +8,7 @@ import {
   Delete,
   ParseUUIDPipe,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
@@ -24,9 +25,10 @@ export class CartController {
     return this.cartService.create(createCartDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.cartService.findOne(id);
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  findOne(@Req() req) {
+    return this.cartService.findOne(req.user.id);
   }
 
   @Get('user/:id')

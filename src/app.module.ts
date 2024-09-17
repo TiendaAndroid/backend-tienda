@@ -9,6 +9,7 @@ import { OrdersModule } from './orders/orders.module';
 import { CartModule } from './cart/cart.module';
 import { AdminModule } from './admin/admin.module';
 import { MailModule } from './mail/mail.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { MailModule } from './mail/mail.module';
     CartModule,
     AdminModule,
     MailModule,
+    PaymentsModule,
     
   ],
 })

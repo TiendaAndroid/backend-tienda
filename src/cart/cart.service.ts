@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { CreateCartItemDto } from './dto/create-cart-item.dto';
 import { CartItems } from './entities/cart-item.entity';
+import { User } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class CartService {
@@ -19,6 +20,8 @@ export class CartService {
     private readonly cartRepository: Repository<Cart>,
     @InjectRepository(CartItems)
     private readonly cartItemRepository: Repository<CartItems>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async create(createCartDto: CreateCartDto) {
@@ -31,19 +34,17 @@ export class CartService {
     }
   }
 
-  async findOne(id: string): Promise<Cart> {
-    let cart: Cart;
-    if (isUUID(id)) {
-      cart = await this.cartRepository.findOne({
-        where: { id },
-      });
+  async findOne(userId: string): Promise<Cart> {
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new BadRequestException('Usuario no encontrado');
+      }
+
+      return user.cart;
+    } catch(err) {
+      throw new BadRequestException(err.detail);
     }
-    if (!cart) {
-      throw new NotFoundException(
-        `There are no results for the search. Search term: ${id}`,
-      );
-    }
-    return cart;
   }
 
   async findOneUser(id: string): Promise<Cart> {
@@ -77,7 +78,7 @@ export class CartService {
     }
   }
 
-  async updateCartItem(id:string, updateCartItemDto: UpdateCartItemDto){
+  async updateCartItem(id: string, updateCartItemDto: UpdateCartItemDto) {
     const cartItem = await this.cartItemRepository.findOne({
       where: {
         id,

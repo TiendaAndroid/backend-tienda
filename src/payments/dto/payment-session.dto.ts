@@ -1,15 +1,20 @@
-import { User } from 'src/auth/entities/user.entity';
-import { ValidStatus } from '../interfaces/valid-status';
-import { IsEnum, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 import { TipoVivienda } from 'src/directions/entities/tipo.enum';
 
-export class CreateOrderDto {
-  @IsUUID()
-  user: User;
-
-  @IsEnum(ValidStatus)
-  @IsOptional()
-  status: ValidStatus;
+export class PaymentsSessionDto {
+  @IsString()
+  currency: string;
 
   @IsEnum(TipoVivienda)
   tipo: TipoVivienda;

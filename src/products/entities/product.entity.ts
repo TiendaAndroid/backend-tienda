@@ -139,10 +139,10 @@ export class Product {
   })
   isActive: boolean;
 
-  @OneToOne(() => CartItems)
+  @OneToMany(() => CartItems, (cartItems) => cartItems.product)
   cartItems: CartItems;
 
-  @OneToOne(() => OrderItems)
+  @OneToMany(() => OrderItems, (orderItems) => orderItems.product)
   orderItems: OrderItems;
 
   /**

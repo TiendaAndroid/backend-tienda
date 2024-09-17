@@ -21,7 +21,7 @@ export class CartItems {
   })
   cart: Cart;
 
-  @OneToOne(() => Product, (product) => product.cartItems, {
+  @ManyToOne(() => Product, (product) => product.cartItems, {
     onDelete: 'CASCADE',
     eager: true,
   })

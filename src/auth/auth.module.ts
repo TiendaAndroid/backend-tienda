@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -37,7 +37,7 @@ import { CartService } from 'src/cart/cart.service';
         };
       },
     }),
-    CartModule
+    forwardRef(() => CartModule)
   ],
   exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule],
 })

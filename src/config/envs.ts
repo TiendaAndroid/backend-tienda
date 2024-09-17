@@ -27,6 +27,10 @@ interface EnvVars {
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
   GOOGLE_CALLBACK_URL: string;
+  STRIPE_SECRET: string;
+  STRIPE_SUCCESS_URL: string;
+  STRIPE_CANCELL_URL: string;
+  STRIPE_ENDPOINT_SECRET: string;
 }
 
 // Validación de las variables de entorno
@@ -46,6 +50,10 @@ const envsSchema = joi
     GOOGLE_CLIENT_ID: joi.string().required(),
     GOOGLE_CLIENT_SECRET: joi.string().required(),
     GOOGLE_CALLBACK_URL: joi.string().required(),
+    STRIPE_SECRET: joi.string().required(),
+    STRIPE_SUCCESS_URL: joi.string().required(),
+    STRIPE_CANCELL_URL: joi.string().required(),
+    STRIPE_ENDPOINT_SECRET: joi.string().required(),
   })
   .unknown(true);
 
@@ -80,4 +88,8 @@ export const envs = {
   google_client_id: envVars.GOOGLE_CLIENT_ID,
   google_client_secret: envVars.GOOGLE_CLIENT_SECRET,
   google_callback_url: envVars.GOOGLE_CALLBACK_URL,
+  stripe_secret: envVars.STRIPE_SECRET,
+  stripe_success_url: envVars.STRIPE_SUCCESS_URL,
+  stripe_cancell_url: envVars.STRIPE_CANCELL_URL,
+  stripe_endpoint_secret: envVars.STRIPE_ENDPOINT_SECRET,
 };

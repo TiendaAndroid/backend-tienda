@@ -20,12 +20,11 @@ export class OrderItems {
   })
   order: Order;
 
-  @OneToOne(() => Product, (product) => product.cartItems, {
+  @ManyToOne(() => Product, (product) => product.orderItems, {
     onDelete: 'CASCADE',
     eager: true,
   })
-  @JoinColumn()
-  product: Product;
+  product: Product; 
 
   @Column('int')
   quantity: number;

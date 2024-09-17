@@ -3,4 +3,5 @@ export enum ValidStatus {
   paid = 'PAID',
   delivered = 'DELIVERED',
   cancelled = 'CANCELLED',
+  send = "SEND"
 }
