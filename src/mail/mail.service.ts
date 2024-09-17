@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { VerifyUserDto } from 'src/auth/dto/verify-user.dto';
 import { ResetPassword } from 'src/auth/entities/reset-password.entity';
 import { User } from 'src/auth/entities/user.entity';
-
+import { envs } from 'src/config';
 
 interface OrderDetails {
   customerName: string;
@@ -36,16 +36,12 @@ export class MailService {
       template: 'reset',
       context: {
         token:
-          'http://localhost:3002/restablecer-contrasena/' + resetPassword.token,
+          `${envs.url_frontend}/restablecer-contrasena/` + resetPassword.token,
       },
     });
   }
 
-  async sendUserSendConfirmation(
-    orderId: string,
-    name: string,
-    email: string,
-  ) {
+  async sendUserSendConfirmation(orderId: string, name: string, email: string) {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Confirmación de envío de Zazil',
