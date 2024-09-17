@@ -31,6 +31,7 @@ interface EnvVars {
   STRIPE_SUCCESS_URL: string;
   STRIPE_CANCELL_URL: string;
   STRIPE_ENDPOINT_SECRET: string;
+  URL_FRONTEND: string;
 }
 
 // Validación de las variables de entorno
@@ -54,6 +55,7 @@ const envsSchema = joi
     STRIPE_SUCCESS_URL: joi.string().required(),
     STRIPE_CANCELL_URL: joi.string().required(),
     STRIPE_ENDPOINT_SECRET: joi.string().required(),
+    URL_FRONTEND: joi.string().required(),
   })
   .unknown(true);
 
@@ -92,4 +94,5 @@ export const envs = {
   stripe_success_url: envVars.STRIPE_SUCCESS_URL,
   stripe_cancell_url: envVars.STRIPE_CANCELL_URL,
   stripe_endpoint_secret: envVars.STRIPE_ENDPOINT_SECRET,
+  url_frontend: envVars.URL_FRONTEND,
 };

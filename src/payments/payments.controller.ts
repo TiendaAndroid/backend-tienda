@@ -3,6 +3,7 @@ import { PaymentsService } from './payments.service';
 import { PaymentsSessionDto } from './dto/payment-session.dto';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt/jwt-auth.guard';
+import { envs } from 'src/config';
 
 @Controller('payments')
 export class PaymentsController {
@@ -15,12 +16,12 @@ export class PaymentsController {
 
   @Get('success')
   success(@Res() res: Response) {
-    return res.redirect('http://localhost:3001/carrito/pagado');
+    return res.redirect(`${envs.url_frontend}/carrito/pagado`);
   }
 
   @Get('cancel')
   cancel(@Res() res: Response) {
-    return res.redirect('http://localhost:3001');
+    return res.redirect(`${envs.url_frontend}`);
   }
 
   @Post('webhook')

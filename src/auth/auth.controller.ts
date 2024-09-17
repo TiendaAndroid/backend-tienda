@@ -10,6 +10,7 @@ import {
   Req,
   SetMetadata,
   ParseUUIDPipe,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto, CreateUserDto, LoginGoogleDto, LoginUserDto } from './dto';
@@ -106,7 +107,7 @@ export class AuthController {
   // Google callback
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  googleAuthRedirect(@Req() req) {
+  googleAuthRedirect(@Req() req, @Res() res) {
     const { email, firstName: name, lastName: lastName, googleId } = req.user;
 
     const loginGoogleDto: LoginGoogleDto = {
@@ -116,6 +117,6 @@ export class AuthController {
       googleId,
     };
 
-    return this.authService.googleLogin(loginGoogleDto);
+    return this.authService.googleLogin(loginGoogleDto, res);
   }
 }

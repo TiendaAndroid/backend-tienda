@@ -23,6 +23,8 @@ import { ResetPassword } from './entities/reset-password.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Cart } from 'src/cart/entities/cart.entity';
+import { Response } from 'express';
+import { envs } from 'src/config';
 
 // Funciones de la autenticación del usuario
 // Autor: Fidel Bonilla
@@ -276,7 +278,7 @@ export class AuthService {
     };
   }
 
-  async googleLogin(loginGoogle: LoginGoogleDto) {
+  async googleLogin(loginGoogle: LoginGoogleDto,  res: Response) {
     const { email, googleId, name, lastName } = loginGoogle;
     let user = await this.userRepository.findOne({
       where: [{ email }, { googleId }],
@@ -296,13 +298,14 @@ export class AuthService {
         lastName: lastName,
       });
       await this.userRepository.save(user);
+      const cart = this.cartRepository.create({ user });
+      await this.cartRepository.save(cart);
     }
     delete user.password;
 
-    return {
-      ...user,
-      token: this.getJwtToken({ id: user.id }),
-    };
+    const token = this.getJwtToken({ id: user.id })
+
+    return res.redirect(`${envs.url_frontend}/login/${token}`);
   }
 
   // Generar un token
