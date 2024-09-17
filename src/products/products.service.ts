@@ -115,6 +115,8 @@ export class ProductsService {
       relations: {
         image: true,
       },
+      take: limit,
+      skip: offset,
     });
 
     if (!data.length || totalResults === 0) {
@@ -133,6 +135,8 @@ export class ProductsService {
       relations: {
         image: true,
       },
+      take: limit,
+      skip: offset,
     });
 
     if (!data.length || totalResults === 0) {
@@ -166,6 +170,8 @@ export class ProductsService {
       relations: {
         image: true,
       },
+      take: limit,
+      skip: offset,
     });
 
     if (!data.length || totalResults === 0) {

@@ -103,6 +103,11 @@ export class PaymentsService {
         const order = await this.ordersRepository.findOne({
           where: { id: chargeSucceded.metadata.order },
         });
+        
+        if (order.status === 'PAID') {
+          res.status(200).send('Order already processed');
+          return;
+        }
 
         const updateOrder = Object.assign(order, {
           status: 'PAID',
