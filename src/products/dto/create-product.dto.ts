@@ -93,18 +93,7 @@ export class CreateProductDto {
    */
   @IsString({ each: true })
   @IsArray()
-  material: string[];
-
-  /**
-   * Tamaños disponibles para el producto.
-   *
-   * Debe ser un arreglo de números.
-   *
-   * @type {number[]}
-   */
-  @IsString({ each: true })
-  @IsArray()
-  size: string[];
+  type: string[];
 
   /**
    * Cantidad de unidades en stock.

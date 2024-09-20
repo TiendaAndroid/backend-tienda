@@ -8,6 +8,7 @@ import { Order, OrderItems } from 'src/orders/entities';
 import { Repository } from 'typeorm';
 import { User } from 'src/auth/entities/user.entity';
 import { MailService } from 'src/mail/mail.service';
+import { Product } from 'src/products/entities';
 
 @Injectable()
 export class PaymentsService {
@@ -17,6 +18,8 @@ export class PaymentsService {
     readonly orderItemRepository: Repository<OrderItems>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Product)
+    private readonly productoRepository: Repository<Product>,
     private readonly mailService: MailService,
   ) {}
   private readonly stripe = new Stripe(envs.stripe_secret);
@@ -103,10 +106,21 @@ export class PaymentsService {
         const order = await this.ordersRepository.findOne({
           where: { id: chargeSucceded.metadata.order },
         });
-        
+
         if (order.status === 'PAID') {
           res.status(200).send('Order already processed');
           return;
+        }
+
+        const updateProduct = await this.productoRepository.findOne({
+          where: { id: chargeSucceded.metadata.product },
+        });
+
+        if (updateProduct.stock > 0) {
+          updateProduct.stock -= 1;
+          await this.productoRepository.save(updateProduct);
+        } else {
+          throw new BadRequestException('Product out of stock');
         }
 
         const updateOrder = Object.assign(order, {

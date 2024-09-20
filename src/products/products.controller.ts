@@ -44,11 +44,6 @@ export class ProductsController {
     return this.productsService.findTipo(tipo, paginationDto);
   }
 
-  @Get('/size/:size')
-  findSize(@Param('size') size: string, @Query() paginationDto: PaginationDto) {
-    return this.productsService.findSize(size, paginationDto);
-  }
-
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.productsService.findOne(id);

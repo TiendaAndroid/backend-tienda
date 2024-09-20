@@ -105,19 +105,7 @@ export class Product {
   @Column('text', {
     array: true,
   })
-  material: string[];
-
-  /**
-   * Tamaños disponibles para el producto.
-   *
-   * Almacena una lista de tamaños en formato numérico.
-   *
-   * @type {number[]}
-   */
-  @Column('text', {
-    array: true,
-  })
-  size: string[];
+  type: string[];
 
   /**
    * Cantidad de unidades en stock.
