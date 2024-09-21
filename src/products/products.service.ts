@@ -75,13 +75,13 @@ export class ProductsService {
    * @author Fidel Bonilla
    */
   async findAll({ limit = 10, offset = 0 }: PaginationDto) {
-    const { 0: data, 1: totalResults } =
+    const [ data, totalResults ] =
       await this.productRepository.findAndCount({
         where: {
           isActive: true,
         },
         take: limit,
-        skip: offset,
+        skip: offset * limit,
         relations: {
           image: true,
         },
@@ -116,7 +116,7 @@ export class ProductsService {
         image: true,
       },
       take: limit,
-      skip: offset,
+      skip: offset * limit,
     });
 
     if (!data.length || totalResults === 0) {
@@ -136,7 +136,7 @@ export class ProductsService {
         image: true,
       },
       take: limit,
-      skip: offset,
+      skip: offset * limit,
     });
 
     if (!data.length || totalResults === 0) {
