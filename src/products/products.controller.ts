@@ -13,6 +13,7 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { string } from 'joi';
 
 @Controller('products')
 export class ProductsController {
@@ -28,6 +29,11 @@ export class ProductsController {
     return this.productsService.findAll(paginationDto);
   }
 
+  @Get('/search/:name')
+  search(@Param('name') name: string) {
+    return this.productsService.findByName(name);
+  }
+
   @Get('/color/:color')
   findColor(
     @Param('color') color: string,
@@ -37,10 +43,7 @@ export class ProductsController {
   }
 
   @Get('/tipo/:tipo')
-  findTipo(
-    @Param('tipo') tipo: string,
-    @Query() paginationDto: PaginationDto,
-  ) {
+  findTipo(@Param('tipo') tipo: string, @Query() paginationDto: PaginationDto) {
     return this.productsService.findTipo(tipo, paginationDto);
   }
 

@@ -74,10 +74,13 @@ export class Product {
    *
    * @type {string}
    */
-  @Column('text', {
-    unique: true,
-  })
+  @Column('text')
   name: string;
+
+  @Column('int',{
+    default: 0
+  })
+  sales: number;
 
   /**
    * Descripción del producto.

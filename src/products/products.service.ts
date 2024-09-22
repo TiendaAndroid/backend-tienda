@@ -75,20 +75,51 @@ export class ProductsService {
    * @author Fidel Bonilla
    */
   async findAll({ limit = 10, offset = 0 }: PaginationDto) {
-    const [ data, totalResults ] =
-      await this.productRepository.findAndCount({
-        where: {
-          isActive: true,
-        },
-        take: limit,
-        skip: offset * limit,
-        relations: {
-          image: true,
-        },
-      });
+    const [data, totalResults] = await this.productRepository.findAndCount({
+      where: {
+        isActive: true,
+      },
+      take: limit,
+      skip: offset * limit,
+      relations: {
+        image: true,
+      },
+    });
     if (!data.length || totalResults == 0)
       throw new NotFoundException(`There aren't results for the search`);
     return { limit, offset, partialResults: data.length, totalResults, data };
+  }
+
+  /**
+   * Busca productos por nombre con paginación.
+   *
+   * Este método devuelve una lista de productos activos que coinciden con el nombre proporcionado, con soporte para paginación.
+   *
+   * @param name - El nombre de los productos que quieres buscar.
+   * @param paginationDto - Detalles de la paginación (límites y desplazamiento).
+   *
+   * @returns Un objeto que contiene los productos, el total de resultados y detalles de paginación.
+   *
+   * @throws {NotFoundException} Si no se encuentran productos.
+   *
+   * @author Fidel Bonilla
+   */
+  async findByName(name: string) {
+    const [data, totalResults] = await this.productRepository.findAndCount({
+      where: {
+        isActive: true,
+        name: Raw((alias) => `${alias} ILIKE '%${name}%'`), // Usa ILIKE para una búsqueda de texto insensible a mayúsculas y minúsculas
+      },
+      relations: {
+        image: true,
+      },
+    });
+
+    if (!data.length || totalResults === 0) {
+      throw new NotFoundException(`There aren't results for the search`);
+    }
+
+    return { data };
   }
 
   /**

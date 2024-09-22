@@ -31,8 +31,6 @@ export class PaymentsService {
     try {
       const { currency, ...payment } = paymentsSessionDto;
 
-      console.log(payment);
-
       const user = await this.userRepository.findOne({ where: { id: userId } });
       if (!user) {
         throw new BadRequestException('Usuario no encontrado');
@@ -105,6 +103,7 @@ export class PaymentsService {
 
         const order = await this.ordersRepository.findOne({
           where: { id: chargeSucceded.metadata.order },
+          relations: ['order_items', 'order_items.product'],
         });
 
         if (order.status === 'PAID') {
@@ -112,46 +111,60 @@ export class PaymentsService {
           return;
         }
 
-        const updateProduct = await this.productoRepository.findOne({
-          where: { id: chargeSucceded.metadata.product },
-        });
+        try {
+          const updateOrder = Object.assign(order, {
+            status: 'PAID',
+            paymentId: chargeSucceded.id,
+            receiptUrl: chargeSucceded.receipt_url,
+          });
 
-        if (updateProduct.stock > 0) {
-          updateProduct.stock -= 1;
-          await this.productoRepository.save(updateProduct);
-        } else {
-          throw new BadRequestException('Product out of stock');
+          const savedOrder = await this.ordersRepository.save(updateOrder);
+          let totalAmount = 0;
+          for (const item of order.order_items) {
+            try {
+              const updateProduct = await this.productoRepository.findOne({
+                where: { id: item.product.id },
+              });
+
+              if (!updateProduct) {
+                console.error(`Product with ID ${item.product.id} not found`);
+                continue;
+              }
+
+              const itemTotal = item.product.price * item.quantity;
+              totalAmount += itemTotal;
+
+              updateProduct.sales = updateProduct.sales + item.quantity;
+              updateProduct.stock = updateProduct.stock - item.quantity;
+
+              await this.productoRepository.save(updateProduct);
+            } catch (error) {
+              console.error(
+                `Error updating product ID ${item.product.id}:`,
+                error,
+              );
+            }
+          }
+
+          await this.mailService.sendOrderConfirmation(
+            chargeSucceded.metadata.email,
+            {
+              customerName: chargeSucceded.metadata.name,
+              orderNumber: order.id,
+              paymentDate: new Date().toISOString(),
+              totalAmount: totalAmount.toString(),
+              products: order.order_items.map((item) => ({
+                name: item.product.name,
+                quantity: item.quantity,
+                price: item.product.price.toString(),
+              })),
+            },
+          );
+
+          return savedOrder;
+        } catch (error) {
+          console.log(error);
         }
-
-        const updateOrder = Object.assign(order, {
-          status: 'PAID',
-          paymentId: chargeSucceded.id,
-          receiptUrl: chargeSucceded.receipt_url,
-        });
-
-        const savedOrder = await this.ordersRepository.save(updateOrder);
-        let totalAmount = 0;
-        order.order_items.forEach((item) => {
-          const itemTotal = item.product.price * item.quantity;
-          totalAmount += itemTotal;
-        });
-
-        await this.mailService.sendOrderConfirmation(
-          chargeSucceded.metadata.email,
-          {
-            customerName: chargeSucceded.metadata.name,
-            orderNumber: order.id,
-            paymentDate: new Date().toISOString(),
-            totalAmount: totalAmount.toString(),
-            products: order.order_items.map((item) => ({
-              name: item.product.name,
-              quantity: item.quantity,
-              price: item.product.price.toString(),
-            })),
-          },
-        );
-
-        return savedOrder;
 
         break;
       default:
