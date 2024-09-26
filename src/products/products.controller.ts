@@ -34,6 +34,21 @@ export class ProductsController {
     return this.productsService.findByName(name);
   }
 
+  @Get('total')
+  totalProducts() {
+    return this.productsService.totalProducts();
+  }
+
+  @Get('count')
+  countProducts() {
+    return this.productsService.countSales();
+  }
+
+  @Get('top')
+  topProducts() {
+    return this.productsService.topProducts();
+  }
+
   @Get('/color/:color')
   findColor(
     @Param('color') color: string,

@@ -13,6 +13,7 @@ import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { PostgreSQLErrorCodes } from 'src/common/enums/db-error.code.enum';
 import { isUUID } from 'class-validator';
 import { Product, ProductImage } from './entities';
+import { count } from 'console';
 
 /**
  * Servicio para gestionar productos en la aplicación.
@@ -88,6 +89,38 @@ export class ProductsService {
     if (!data.length || totalResults == 0)
       throw new NotFoundException(`There aren't results for the search`);
     return { limit, offset, partialResults: data.length, totalResults, data };
+  }
+
+  async totalProducts() {
+    const [data, totalResults] = await this.productRepository.findAndCount({
+      where: {
+        isActive: true
+      },
+    });
+    const totalProducts = data.length;
+    return { totalProducts };
+  }
+
+  async countSales() {
+    const [data, totalResults] = await this.productRepository.findAndCount({
+      where: {
+        isActive: true,
+        sales: Raw((alias) => `${alias} > 0`),
+      },
+    });
+    const totalSales = data.reduce((sum, product) => sum + product.sales, 0);
+    return { totalSales };
+  }
+
+  async topProducts() {
+    const [data, totalResults] = await this.productRepository.findAndCount({
+      where: {
+        isActive: true,
+        sales: Raw((alias) => `${alias} > 0`),
+      },
+    });
+    const topProducts = data.sort((a, b) => b.sales - a.sales).slice(0, 5);
+    return { topProducts };
   }
 
   /**

@@ -32,8 +32,7 @@ import { PaymentsModule } from './payments/payments.module';
     CartModule,
     AdminModule,
     MailModule,
-    PaymentsModule,
-    
+    PaymentsModule,    
   ],
 })
 export class AppModule {}
