@@ -1,4 +1,4 @@
-FROM node:21-bullseye-slim
+FROM node:20.9.0-bullseye-slim
 
 # Install required dependencies for sharp
 RUN apt-get update && apt-get install -y \
@@ -21,3 +21,4 @@ COPY . .
 EXPOSE 4000
 
 CMD ["sh", "-c", "npm run build && npm run start:dev"]
+
