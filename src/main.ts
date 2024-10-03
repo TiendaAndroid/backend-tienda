@@ -10,7 +10,7 @@ async function bootstrap() {
   });
   const logger = new Logger('Bootstrap');
 
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('zazil_backend/api');
   app.enableCors();
   
   app.useGlobalPipes(
