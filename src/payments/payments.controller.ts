@@ -14,6 +14,12 @@ export class PaymentsController {
     return this.paymentsService.createPaymentSession(req.user.id, paymentsSessionDto);
   }
 
+  @Post('create-payment-session-android')
+  @UseGuards(JwtAuthGuard)
+  createPaymentIntent(@Req() req,@Body() paymentsSessionDto: PaymentsSessionDto) {
+    return this.paymentsService.createPaymentIntent(req.user.id, paymentsSessionDto);
+  }
+
   @Get('success')
   success(@Res() res: Response) {
     return res.redirect(`${envs.url_frontend}/carrito/pagado`);
@@ -28,4 +34,6 @@ export class PaymentsController {
   webhook(@Req() req: Request, @Res() res: Response) {
     return this.paymentsService.webhook(req, res);
   }
+
+  
 }

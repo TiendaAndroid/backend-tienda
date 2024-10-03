@@ -79,6 +79,57 @@ export class PaymentsService {
     }
   }
 
+  async createPaymentIntent(
+    userId: string,
+    paymentsSessionDto: PaymentsSessionDto,
+  ) {
+    try {
+      const { currency, ...payment } = paymentsSessionDto;
+
+      // Buscar al usuario
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new BadRequestException('Usuario no encontrado');
+      }
+
+      // Crear la orden con la información del usuario y del pago
+      const order = this.ordersRepository.create({ user: user, ...payment });
+      await this.ordersRepository.save(order);
+
+      // Crear los items de la orden
+      user.cart.cart_items.map((item) => {
+        const orderItem = this.orderItemRepository.create({
+          order: order,
+          product: item.product,
+          quantity: item.quantity,
+        });
+        this.orderItemRepository.save(orderItem);
+      });
+
+      // Calcular el monto total del pago
+      const totalAmount = user.cart.cart_items.reduce((total, item) => {
+        return total + item.product.price * item.quantity;
+      }, 0);
+
+      // Crear un PaymentIntent con Stripe
+      const paymentIntent = await this.stripe.paymentIntents.create({
+        amount: Math.round(totalAmount * 100), // Stripe usa centavos
+        currency: currency,
+        metadata: {
+          order: order.id,
+          email: user.email,
+          name: user.name,
+        },
+      });
+
+      return { clientSecret: paymentIntent.client_secret };
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Failed to create payment intent',
+      );
+    }
+  }
+
   async webhook(req: Request, res: Response) {
     const sig = req.headers['stripe-signature'];
 
