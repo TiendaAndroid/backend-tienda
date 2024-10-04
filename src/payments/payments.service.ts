@@ -206,19 +206,12 @@ export class PaymentsService {
               products: [
                 ...order.order_items.map((item) => {
                   const productPrice = item.product.price;
-                  const productIVA = (productPrice * 0.16).toFixed(2);
                   return {
                     name: item.product.name,
                     quantity: item.quantity,
-                    price: productPrice.toFixed(2),
-                    iva: productIVA, 
+                    price: (productPrice*1.16).toFixed(2),
                   };
-                }),
-                {
-                  name: 'IVA Total',
-                  quantity: 1,
-                  price: (totalAmount * 0.16).toFixed(2),
-                },
+                })
               ],
             },
           );
