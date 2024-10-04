@@ -92,7 +92,6 @@ export class PaymentsService {
         throw new BadRequestException('Usuario no encontrado');
       }
 
-      // Crear la orden con la información del usuario y del pago
       const order = this.ordersRepository.create({ user: user, ...payment });
       await this.ordersRepository.save(order);
 
@@ -203,7 +202,7 @@ export class PaymentsService {
               customerName: chargeSucceded.metadata.name,
               orderNumber: order.id,
               paymentDate: new Date().toISOString(),
-              totalAmount: totalAmount.toString(),
+              totalAmount: (totalAmount * 1.16).toString(),
               products: order.order_items.map((item) => ({
                 name: item.product.name,
                 quantity: item.quantity,
