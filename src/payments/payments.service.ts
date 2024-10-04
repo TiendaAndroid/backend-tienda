@@ -204,15 +204,20 @@ export class PaymentsService {
               paymentDate: new Date().toISOString(),
               totalAmount: (totalAmount * 1.16).toFixed(2), // Calcula el total con IVA y lo convierte a string
               products: [
-                ...order.order_items.map((item) => ({
-                  name: item.product.name,
-                  quantity: item.quantity,
-                  price: item.product.price.toFixed(2), // Asegúrate de mostrar el precio con dos decimales
-                })),
+                ...order.order_items.map((item) => {
+                  const productPrice = item.product.price;
+                  const productIVA = (productPrice * 0.16).toFixed(2);
+                  return {
+                    name: item.product.name,
+                    quantity: item.quantity,
+                    price: productPrice.toFixed(2),
+                    iva: productIVA, 
+                  };
+                }),
                 {
-                  name: 'IVA',
+                  name: 'IVA Total',
                   quantity: 1,
-                  price: (totalAmount * 0.16).toFixed(2), // Calcula el IVA (16% del total)
+                  price: (totalAmount * 0.16).toFixed(2),
                 },
               ],
             },
