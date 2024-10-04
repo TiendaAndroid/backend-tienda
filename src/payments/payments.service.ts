@@ -49,13 +49,15 @@ export class PaymentsService {
       });
 
       const lineItems = user.cart.cart_items.map((item) => {
+        const productPrice = item.product.price;
+        const productPriceWithIVA = productPrice * 1.16;
         return {
           price_data: {
             currency: currency,
             product_data: {
               name: item.product.name.toString(),
             },
-            unit_amount: Math.round(item.product.price * 100),
+            unit_amount: Math.round(productPriceWithIVA * 100),
           },
           quantity: item.quantity,
         };
@@ -110,9 +112,11 @@ export class PaymentsService {
         return total + item.product.price * item.quantity;
       }, 0);
 
+      const totalAmountWithIVA = totalAmount * 1.16;
+
       // Crear un PaymentIntent con Stripe
       const paymentIntent = await this.stripe.paymentIntents.create({
-        amount: Math.round(totalAmount * 100), // Stripe usa centavos
+        amount: Math.round(totalAmountWithIVA * 100), // Stripe usa centavos
         currency: currency,
         metadata: {
           order: order.id,
@@ -209,9 +213,9 @@ export class PaymentsService {
                   return {
                     name: item.product.name,
                     quantity: item.quantity,
-                    price: (productPrice*1.16).toFixed(2),
+                    price: (productPrice * 1.16).toFixed(2),
                   };
-                })
+                }),
               ],
             },
           );
