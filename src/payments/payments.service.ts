@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/auth/entities/user.entity';
 import { MailService } from 'src/mail/mail.service';
 import { Product } from 'src/products/entities';
+import { CartService } from 'src/cart/cart.service';
 
 @Injectable()
 export class PaymentsService {
@@ -21,6 +22,7 @@ export class PaymentsService {
     @InjectRepository(Product)
     private readonly productoRepository: Repository<Product>,
     private readonly mailService: MailService,
+    private readonly cartService: CartService,
   ) {}
   private readonly stripe = new Stripe(envs.stripe_secret);
 
@@ -159,6 +161,8 @@ export class PaymentsService {
           where: { id: chargeSucceded.metadata.order },
           relations: ['order_items', 'order_items.product'],
         });
+
+        await this.cartService.remove(order.user.id);
 
         if (order.status === 'PAID') {
           res.status(200).send('Order already processed');

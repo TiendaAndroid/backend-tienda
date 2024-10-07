@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersModule } from 'src/orders/orders.module';
 import { Order, OrderItems } from 'src/orders/entities';
 import { Product } from 'src/products/entities';
+import { CartModule } from 'src/cart/cart.module';
 
 @Module({
   controllers: [PaymentsController],
@@ -14,6 +15,7 @@ import { Product } from 'src/products/entities';
     AuthModule,
     TypeOrmModule.forFeature([Order, OrderItems, Product]),
     OrdersModule,
+    CartModule
   ],
 })
 export class PaymentsModule {}
