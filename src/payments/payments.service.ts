@@ -162,10 +162,6 @@ export class PaymentsService {
           relations: ['order_items', 'order_items.product'],
         });
 
-        const user = await this.userRepository.findOne({
-          where: { id: order.user.id },
-        });
-        await this.cartService.remove(user.cart.id);
 
         if (order.status === 'PAID') {
           res.status(200).send('Order already processed');
