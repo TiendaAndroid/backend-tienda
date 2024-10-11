@@ -62,6 +62,10 @@ export class CreateProductDto {
   @MaxLength(50)
   name: string;
 
+  @IsNumber()
+  @IsOptional()
+  valor?: number;
+
   /**
    * Descripción del producto.
    *
