@@ -10,6 +10,7 @@ import {
 import { ProductImage } from './product-image.entity';
 import { CartItems } from 'src/cart/entities/cart-item.entity';
 import { OrderItems } from 'src/orders/entities';
+import { int } from '@zxing/library/esm/customTypings';
 
 /**
  * Entidad que representa un producto en el sistema.
@@ -77,8 +78,8 @@ export class Product {
   @Column('text')
   name: string;
 
-  @Column('int',{
-    default: 0
+  @Column('int', {
+    default: 0,
   })
   sales: number;
 
@@ -129,6 +130,11 @@ export class Product {
     default: true,
   })
   isActive: boolean;
+
+  @Column('int', {
+    default: 0,
+  })
+  valor: int;
 
   @OneToMany(() => CartItems, (cartItems) => cartItems.product)
   cartItems: CartItems;
