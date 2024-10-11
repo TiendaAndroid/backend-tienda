@@ -12,6 +12,8 @@ import { isUUID } from 'class-validator';
 import { CreateCartItemDto } from './dto/create-cart-item.dto';
 import { CartItems } from './entities/cart-item.entity';
 import { User } from 'src/auth/entities/user.entity';
+import { Product } from 'src/products/entities';
+import { ProductsService } from 'src/products/products.service';
 
 @Injectable()
 export class CartService {
@@ -22,6 +24,8 @@ export class CartService {
     private readonly cartItemRepository: Repository<CartItems>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
   ) {}
 
   async create(createCartDto: CreateCartDto) {
@@ -42,7 +46,7 @@ export class CartService {
       }
 
       return user.cart;
-    } catch(err) {
+    } catch (err) {
       throw new BadRequestException(err.detail);
     }
   }
@@ -70,11 +74,44 @@ export class CartService {
 
   async cartItemsCreate(createCartItemDto: CreateCartItemDto) {
     try {
-      const cart = this.cartItemRepository.create(createCartItemDto);
-      await this.cartItemRepository.save(cart);
-      return cart;
+      const product = await this.productRepository.findOne({
+        where: {
+          id: createCartItemDto.product,
+        },
+      });
+
+      if (!product) {
+        throw new BadRequestException('Producto no encontrado');
+      }
+
+      if (product.stock > 0) {
+        const cart = await this.cartRepository.findOne({
+          where: {
+            id: createCartItemDto.cart,
+          },
+        });
+
+        if (!cart) {
+          throw new BadRequestException('Carrito no encontrado');
+        }
+
+        const cartItem = this.cartItemRepository.create({
+          cart,
+          product,
+          quantity: createCartItemDto.quantity,
+        });
+
+        await this.cartItemRepository.save(cartItem);
+        return cartItem;
+      } else {
+        throw new BadRequestException(
+          'No hay stock disponible para este producto',
+        );
+      }
     } catch (error) {
-      throw new BadRequestException(error.detail);
+      throw new BadRequestException(
+        error.message || 'Error al crear el ítem del carrito',
+      );
     }
   }
 
@@ -83,14 +120,27 @@ export class CartService {
       where: {
         id,
       },
+      relations: ['product'], 
     });
 
     if (!cartItem) {
-      throw new NotFoundException(`Cart item with ID ${id} not found`);
+      throw new NotFoundException(
+        `El ítem del carrito con ID ${id} no se encontró`,
+      );
+    }
+    const newQuantity = updateCartItemDto.quantity;
+    if (newQuantity > cartItem.product.stock) {
+      throw new BadRequestException(
+        `No se puede actualizar. La cantidad solicitada (${newQuantity}) excede el stock disponible (${cartItem.product.stock})`,
+      );
     }
 
     await this.cartItemRepository.update(id, updateCartItemDto);
-    return cartItem;
+
+    return {
+      ...cartItem,
+      ...updateCartItemDto, 
+    };
   }
 
   async removeCartItem(id: string): Promise<CartItems> {

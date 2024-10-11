@@ -79,6 +79,23 @@ export class ProductsService {
     const [data, totalResults] = await this.productRepository.findAndCount({
       where: {
         isActive: true,
+        stock: Raw((alias) => `${alias} > 0`),
+      },
+      take: limit,
+      skip: offset * limit,
+      relations: {
+        image: true,
+      },
+    });
+    if (!data.length || totalResults == 0)
+      throw new NotFoundException(`There aren't results for the search`);
+    return { limit, offset, partialResults: data.length, totalResults, data };
+  }
+
+  async findAllAdmin({ limit = 10, offset = 0 }: PaginationDto) {
+    const [data, totalResults] = await this.productRepository.findAndCount({
+      where: {
+        isActive: true,
       },
       take: limit,
       skip: offset * limit,
@@ -94,7 +111,7 @@ export class ProductsService {
   async totalProducts() {
     const [data, totalResults] = await this.productRepository.findAndCount({
       where: {
-        isActive: true
+        isActive: true,
       },
     });
     const totalProducts = data.length;
@@ -141,7 +158,26 @@ export class ProductsService {
     const [data, totalResults] = await this.productRepository.findAndCount({
       where: {
         isActive: true,
-        name: Raw((alias) => `${alias} ILIKE '%${name}%'`), // Usa ILIKE para una búsqueda de texto insensible a mayúsculas y minúsculas
+        name: Raw((alias) => `${alias} ILIKE '%${name}%'`),
+        stock: Raw((alias) => `${alias} > 0`),
+      },
+      relations: {
+        image: true,
+      },
+    });
+
+    if (!data.length || totalResults === 0) {
+      throw new NotFoundException(`There aren't results for the search`);
+    }
+
+    return { data };
+  }
+
+  async findByNameAll(name: string) {
+    const [data, totalResults] = await this.productRepository.findAndCount({
+      where: {
+        isActive: true,
+        name: Raw((alias) => `${alias} ILIKE '%${name}%'`),
       },
       relations: {
         image: true,

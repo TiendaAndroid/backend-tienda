@@ -33,6 +33,14 @@ import {
      lastName: string;
 
      @IsString()
+     @MinLength(1)
+     phoneNumber: string;
+
+     @IsString()
+     @MinLength(1)
+     birthDay: string;
+
+     @IsString()
      googleId
    }
    

@@ -29,9 +29,19 @@ export class ProductsController {
     return this.productsService.findAll(paginationDto);
   }
 
+  @Get('/all')
+  findAllAdmin(@Query() paginationDto: PaginationDto) {
+    return this.productsService.findAllAdmin(paginationDto);
+  }
+
   @Get('/search/:name')
   search(@Param('name') name: string) {
     return this.productsService.findByName(name);
+  }
+
+  @Get('/search/all/:name')
+  searchAll(@Param('name') name: string) {
+    return this.productsService.findByNameAll(name);
   }
 
   @Get('total')

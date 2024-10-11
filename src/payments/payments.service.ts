@@ -174,6 +174,8 @@ export class PaymentsService {
             receiptUrl: chargeSucceded.receipt_url,
           });
 
+          console.log(chargeSucceded.metadata.cartId)
+
           await this.cartService.remove(chargeSucceded.metadata.cartId);
 
           const savedOrder = await this.ordersRepository.save(updateOrder);

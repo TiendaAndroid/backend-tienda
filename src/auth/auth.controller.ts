@@ -108,13 +108,15 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   googleAuthRedirect(@Req() req, @Res() res) {
-    const { email, firstName: name, lastName: lastName, googleId } = req.user;
+    const { email, firstName: name, lastName: lastName, googleId, phoneNumber, birthDay } = req.user;
 
     const loginGoogleDto: LoginGoogleDto = {
       email,
       name,
       lastName,
       googleId,
+      phoneNumber,
+      birthDay,
     };
 
     return this.authService.googleLogin(loginGoogleDto, res);

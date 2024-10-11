@@ -4,10 +4,10 @@ import { IsNumber, IsUUID } from 'class-validator';
 
 export class CreateCartItemDto {
   @IsUUID()
-  cart: Cart;
+  cart: string;
 
   @IsUUID()
-  product: Product;
+  product: string;
 
   @IsNumber()
   quantity: number;

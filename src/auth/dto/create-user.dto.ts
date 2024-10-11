@@ -40,4 +40,13 @@ export class CreateUserDto {
 
   @IsString()
   token: string;
+
+  @IsString()
+  @IsOptional()
+  @Matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)
+  birthDay?: string;
+
+  @IsString()
+  @IsOptional()
+  phoneNumber?: string;
 }

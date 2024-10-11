@@ -25,6 +25,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Cart } from 'src/cart/entities/cart.entity';
 import { Response } from 'express';
 import { envs } from 'src/config';
+import { CartItems } from 'src/cart/entities/cart-item.entity';
 
 // Funciones de la autenticación del usuario
 // Autor: Fidel Bonilla
@@ -43,6 +44,8 @@ export class AuthService {
     private readonly cartRepository: Repository<Cart>,
     private readonly jwtService: JwtService,
     private mailService: MailService,
+    @InjectRepository(CartItems)
+    private readonly cartItemRepository: Repository<CartItems>,
   ) {}
 
   async mail(verifyUserDto: VerifyUserDto) {
@@ -59,7 +62,9 @@ export class AuthService {
       let user = await this.verifyUserRepository.findOne({
         where: { email: verifyUserDto.email },
       });
-
+      if (verifyUserDto.password) {
+        verifyUserDto.password = bcrypt.hashSync(verifyUserDto.password, 10);
+      }
       if (!user) {
         user = this.verifyUserRepository.create(verifyUserDto);
         await this.verifyUserRepository.save(user);
@@ -123,12 +128,21 @@ export class AuthService {
 
   async getProfile(userId: string) {
     try {
-      // Buscar al usuario por su ID
       const user = await this.userRepository.findOne({ where: { id: userId } });
 
-      // Si el usuario no existe, lanzar un error
       if (!user) {
         throw new BadRequestException('Usuario no encontrado');
+      }
+
+      const cart = await this.cartRepository.find({
+        where: { user: { id: userId } },
+        relations: ['cart_items', 'cart_items.product'], // Cargar las relaciones necesarias
+      });
+
+      for (const cartItem of cart[0].cart_items) {
+        if (cartItem.product.stock <= 0) {
+          await this.cartItemRepository.remove(cartItem);
+        }
       }
 
       delete user.password;
@@ -278,8 +292,8 @@ export class AuthService {
     };
   }
 
-  async googleLogin(loginGoogle: LoginGoogleDto,  res: Response) {
-    const { email, googleId, name, lastName } = loginGoogle;
+  async googleLogin(loginGoogle: LoginGoogleDto, res: Response) {
+    const { email, googleId, name, lastName, phoneNumber, birthDay } = loginGoogle;
     let user = await this.userRepository.findOne({
       where: [{ email }, { googleId }],
     });
@@ -296,6 +310,8 @@ export class AuthService {
         googleId: googleId,
         name: name,
         lastName: lastName,
+        phoneNumber: phoneNumber,
+        birthDay: birthDay,
       });
       await this.userRepository.save(user);
       const cart = this.cartRepository.create({ user });
@@ -303,7 +319,7 @@ export class AuthService {
     }
     delete user.password;
 
-    const token = this.getJwtToken({ id: user.id })
+    const token = this.getJwtToken({ id: user.id });
 
     return res.redirect(`${envs.url_frontend}/login/${token}`);
   }

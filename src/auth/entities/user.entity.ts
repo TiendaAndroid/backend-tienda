@@ -40,6 +40,16 @@ export class User {
   @Column('text', {
     nullable: true,
   })
+  birthDay: string;
+
+  @Column('text', {
+    nullable: true,
+  })
+  phoneNumber: string;
+
+  @Column('text', {
+    nullable: true,
+  })
   googleId?: string;
 
   @Column('bool', {
