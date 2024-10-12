@@ -124,7 +124,6 @@ export class PaymentsService {
           order: order.id,
           email: user.email,
           name: user.name,
-          cartId: user.cart.id,
         },
       });
 
@@ -173,10 +172,6 @@ export class PaymentsService {
             paymentId: chargeSucceded.id,
             receiptUrl: chargeSucceded.receipt_url,
           });
-
-          console.log(chargeSucceded.metadata.cartId)
-
-          await this.cartService.remove(chargeSucceded.metadata.cartId);
 
           const savedOrder = await this.ordersRepository.save(updateOrder);
           let totalAmount = 0;
