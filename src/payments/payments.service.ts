@@ -97,6 +97,7 @@ export class PaymentsService {
       }
 
       const order = this.ordersRepository.create({ user: user, ...payment });
+      console.log(order);
       await this.ordersRepository.save(order);
 
       // Crear los items de la orden
@@ -165,6 +166,8 @@ export class PaymentsService {
           res.status(200).send('Order already processed');
           return;
         }
+
+        console.log(order);
 
         try {
           const updateOrder = Object.assign(order, {

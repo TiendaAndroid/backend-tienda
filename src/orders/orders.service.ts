@@ -38,13 +38,12 @@ export class OrdersService {
       order: {
         createdAt: 'DESC',
       },
-      relations: ['user']
+      relations: ['user'],
     });
 
     if (!data.length || totalResults == 0)
       throw new NotFoundException(`There aren't results for the search`);
 
-    // Mapear los datos para incluir solo el campo 'name' del usuario
     const mappedData = data.map((order) => ({
       ...order,
       user: {
@@ -85,8 +84,6 @@ export class OrdersService {
     }
     return order;
   }
-
-  // ...
 
   async sales() {
     const [data] = await this.ordersRepository.findAndCount({
