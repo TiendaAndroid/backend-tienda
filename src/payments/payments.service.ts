@@ -129,6 +129,8 @@ export class PaymentsService {
         },
       });
 
+      console.log(user.cart.id)
+
       return { clientSecret: paymentIntent.client_secret };
     } catch (error) {
       throw new BadRequestException(
@@ -168,7 +170,7 @@ export class PaymentsService {
           return;
         }
 
-        console.log(chargeSucceded.metadata.cart);
+        console.log(chargeSucceded.metadata);
 
         try {
           const updateOrder = Object.assign(order, {
