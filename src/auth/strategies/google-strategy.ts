@@ -15,7 +15,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
-
   async validate(
     accessToken: string,
     refreshToken: string,
@@ -23,14 +22,19 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ): Promise<any> {
     const { name, emails, photos, id } = profile;
+    const birthDate = profile._json.birthday; // Este es el campo de cumpleaños si está disponible
+    const phoneNumber = profile._json.phoneNumbers
+      ? profile._json.phoneNumbers[0].value
+      : null;
+
     const user = {
       email: emails[0].value,
       firstName: name.givenName,
       lastName: name.familyName,
       picture: photos[0].value,
-      birthDate: profile.birthday,
+      birthDate,
       googleId: id,
-      phoneNumber: profile.phoneNumber,
+      phoneNumber,
       accessToken,
     };
     done(null, user);

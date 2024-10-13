@@ -293,7 +293,8 @@ export class AuthService {
   }
 
   async googleLogin(loginGoogle: LoginGoogleDto, res: Response) {
-    const { email, googleId, name, lastName, phoneNumber, birthDay } = loginGoogle;
+    const { email, googleId, name, lastName, phoneNumber, birthDay } =
+      loginGoogle;
     let user = await this.userRepository.findOne({
       where: [{ email }, { googleId }],
     });
