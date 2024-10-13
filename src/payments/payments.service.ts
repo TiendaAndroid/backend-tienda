@@ -97,7 +97,6 @@ export class PaymentsService {
       }
 
       const order = this.ordersRepository.create({ user: user, ...payment });
-      console.log(order);
       await this.ordersRepository.save(order);
 
       // Crear los items de la orden
@@ -125,12 +124,8 @@ export class PaymentsService {
           order: order.id,
           email: user.email,
           name: user.name,
-          cart: user.cart.id,
         },
       });
-
-      console.log(user.cart.id)
-
       return { clientSecret: paymentIntent.client_secret };
     } catch (error) {
       throw new BadRequestException(
@@ -170,9 +165,14 @@ export class PaymentsService {
           return;
         }
 
-        console.log(chargeSucceded.metadata);
-
         try {
+          const user = this.userRepository.findOne({
+            where: { email: chargeSucceded.metadata.email },
+          });
+
+          console.log(user);
+
+          await this.cartService.remove((await user).cart.id);
           const updateOrder = Object.assign(order, {
             status: 'PAID',
             paymentId: chargeSucceded.id,
