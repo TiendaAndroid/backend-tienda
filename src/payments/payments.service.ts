@@ -125,6 +125,7 @@ export class PaymentsService {
           order: order.id,
           email: user.email,
           name: user.name,
+          cart: user.cart.id,
         },
       });
 
@@ -167,7 +168,7 @@ export class PaymentsService {
           return;
         }
 
-        console.log(order);
+        console.log(chargeSucceded.metadata.cart);
 
         try {
           const updateOrder = Object.assign(order, {
