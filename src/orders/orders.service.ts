@@ -75,6 +75,7 @@ export class OrdersService {
     if (isUUID(id)) {
       order = await this.ordersRepository.findOne({
         where: { id },
+        relations: ['user'],
       });
     }
     if (!order) {
@@ -82,6 +83,7 @@ export class OrdersService {
         `There are no results for the search. Search term: ${id}`,
       );
     }
+    delete order.user.password
     return order;
   }
 

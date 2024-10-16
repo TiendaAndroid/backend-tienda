@@ -169,9 +169,7 @@ export class PaymentsService {
           const user = this.userRepository.findOne({
             where: { email: chargeSucceded.metadata.email },
           });
-
-          console.log(user);
-
+          
           await this.cartService.remove((await user).cart.id);
           const updateOrder = Object.assign(order, {
             status: 'PAID',
