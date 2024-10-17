@@ -47,6 +47,11 @@ export class Order {
   })
   paymentId?: string;
 
+  @Column('text', {
+    nullable: true,
+  })
+  deliveryDate?: string;
+
   @Column({
     type: 'enum',
     enum: TipoVivienda,

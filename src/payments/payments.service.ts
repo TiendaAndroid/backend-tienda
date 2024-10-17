@@ -169,12 +169,15 @@ export class PaymentsService {
           const user = this.userRepository.findOne({
             where: { email: chargeSucceded.metadata.email },
           });
-          
+
           await this.cartService.remove((await user).cart.id);
           const updateOrder = Object.assign(order, {
             status: 'PAID',
             paymentId: chargeSucceded.id,
             receiptUrl: chargeSucceded.receipt_url,
+            deliveryDate: new Date(
+              Date.now() + 7 * 24 * 60 * 60 * 1000,
+            ).toISOString(),
           });
 
           const savedOrder = await this.ordersRepository.save(updateOrder);

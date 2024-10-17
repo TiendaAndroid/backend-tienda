@@ -15,6 +15,10 @@ export class CreateOrderDto {
   tipo: TipoVivienda;
 
   @IsString()
+  @IsOptional()
+  deliveryDate?: string;
+
+  @IsString()
   pais: string;
 
   @IsString()
